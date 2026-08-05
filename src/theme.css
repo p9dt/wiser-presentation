@@ -1,0 +1,427 @@
+/* ─── Ink Mono theme — B&W only ─── */
+/* Font overrides: --serif → Poppins (headline), --sans → Space Grotesk (body) */
+/* Chrome elements must NEVER use --serif or --sans — they use system-ui. */
+
+.im-root {
+  --ink: #080808;
+  --paper: #f2f2f0;
+  --muted: #8a8a86;
+  --line: rgba(242, 242, 240, 0.22);
+  --soft: rgba(242, 242, 240, 0.08);
+  --accent: #f2f2f0;
+
+  /* Font overrides (user-specified) */
+  --serif: "Poppins", Arial, sans-serif;
+  --sans: "Space Grotesk", Arial, sans-serif;
+  --mono: "Space Mono", ui-monospace, monospace;
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: var(--paper);
+  font-family: var(--sans);
+
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.04), transparent 28%),
+    linear-gradient(130deg, #050505 0%, #121212 52%, #070707 100%);
+}
+
+/* ── Slide canvas ── */
+.im-root .slide {
+  position: absolute;
+  inset: 0;
+  padding: 5.5vh 6vw 5.5vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Entry animation ── */
+@keyframes im-enter {
+  from { opacity: 0; transform: translateY(14px); filter: blur(8px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes im-enter { from { opacity: 0; } to { opacity: 1; } }
+}
+
+.im-root .slide {
+  animation: im-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Reveal items ── */
+.ri {
+  opacity: 0;
+  transform: translateY(8px);
+  filter: blur(3px);
+  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ri.in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ri { transition: opacity 0.2s; filter: none; transform: none; }
+}
+
+/* ── Typography ── */
+.im-root .eyebrow {
+  font-family: var(--mono);
+  font-size: clamp(9px, 0.85vw, 14px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2.2vh;
+}
+
+.im-root h1 {
+  font-family: var(--serif);
+  font-size: clamp(52px, 7.5vw, 130px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  max-width: 16ch;
+  margin-bottom: 3vh;
+}
+
+.im-root h2 {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.6vw, 60px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  color: var(--paper);
+  max-width: 22ch;
+  margin-bottom: 2.5vh;
+}
+
+.im-root h1 em,
+.im-root h2 em {
+  color: var(--accent);
+  font-style: italic;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+.im-root .subtitle {
+  font-family: var(--sans);
+  font-size: clamp(13px, 1.3vw, 20px);
+  font-weight: 300;
+  color: rgba(242, 242, 240, 0.55);
+  max-width: 48ch;
+  line-height: 1.55;
+  margin-bottom: 2vh;
+}
+
+.im-root .caption {
+  font-family: var(--sans);
+  font-size: clamp(10px, 0.9vw, 14px);
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 42ch;
+  line-height: 1.6;
+}
+
+.im-root .title-note {
+  font-family: var(--mono);
+  font-size: clamp(11px, 1.1vw, 18px);
+  color: rgba(242, 242, 240, 0.35);
+  margin-top: 3.5vh;
+  letter-spacing: 0.04em;
+}
+
+.im-root .nav-hint {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-size: clamp(9px, 0.75vw, 12px);
+  letter-spacing: 0.14em;
+  color: rgba(242, 242, 240, 0.22);
+}
+
+/* ── Title slide ── */
+.im-root .title-slide {
+  justify-content: flex-end;
+  padding-bottom: 7vh;
+}
+.im-root .title-slide h1 {
+  margin-bottom: 2.5vh;
+}
+
+/* ── Shift slide (question / context-layout) ── */
+.im-root .shift-slide {
+  /* inherits .slide flex-column; h2 + eyebrow sit naturally */
+}
+
+.im-root .context-layout {
+  position: absolute;
+  top: 44%;
+  left: 6vw;
+  right: 6vw;
+  display: grid;
+  grid-template-columns: 1fr 100px 1.2fr;
+  align-items: start;
+  gap: 0;
+}
+
+.im-root .ctx-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vh;
+}
+.im-root .ctx-inputs strong {
+  font-family: var(--serif);
+  font-size: clamp(13px, 1.25vw, 20px);
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(242, 242, 240, 0.6);
+  display: block;
+  line-height: 1.2;
+}
+.im-root .ctx-label {
+  font-family: var(--mono);
+  font-size: clamp(8px, 0.7vw, 11px);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 0.8vh;
+}
+.im-root .ctx-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2vh;
+  color: rgba(242, 242, 240, 0.22);
+  font-size: clamp(18px, 2vw, 30px);
+}
+.im-root .ctx-result {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vh;
+  padding-left: 2vw;
+  border-left: 1px solid var(--line);
+}
+.im-root .ctx-result strong {
+  font-family: var(--serif);
+  font-size: clamp(14px, 1.35vw, 22px);
+  font-weight: 600;
+  color: var(--paper);
+  display: block;
+  line-height: 1.2;
+}
+
+/* ── Rules slide ── */
+.im-root .rules-slide {
+  /* slide base */
+}
+.im-root .rule-list {
+  position: absolute;
+  top: 36%;
+  right: 0;
+  width: min(800px, 62vw);
+  border-top: 1px solid var(--line);
+}
+.im-root .rule-list .rule-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 1.2fr;
+  border-bottom: 1px solid var(--line);
+  padding: 1.8vh 2vw 1.8vh 0;
+  align-items: start;
+  gap: 1.5vw;
+}
+.im-root .rule-list .rule-num {
+  font-family: var(--mono);
+  font-size: clamp(9px, 0.8vw, 13px);
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  padding-top: 0.2em;
+}
+.im-root .rule-list .rule-title {
+  font-family: var(--serif);
+  font-size: clamp(13px, 1.2vw, 19px);
+  font-weight: 500;
+  color: var(--paper);
+  line-height: 1.3;
+}
+.im-root .rule-list .rule-copy {
+  font-family: var(--sans);
+  font-size: clamp(11px, 0.95vw, 15px);
+  font-weight: 300;
+  color: rgba(242, 242, 240, 0.55);
+  line-height: 1.5;
+}
+.im-root .rule-list .rule-row.highlight .rule-title {
+  color: var(--paper);
+  font-weight: 700;
+}
+.im-root .rule-list .rule-row.highlight .rule-num {
+  color: var(--paper);
+}
+
+/* ── Map slide (pillar grid) ── */
+.im-root .map-slide {
+  /* slide base */
+}
+.im-root .pillar-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  display: grid;
+  border-top: 1px solid var(--line);
+  background: var(--line);
+  gap: 1px;
+}
+.im-root .pillar-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.im-root .pillar-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+.im-root .pillar {
+  background: var(--ink);
+  padding: 2.5vh 2vw;
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  transition: background 0.3s ease;
+}
+.im-root .pillar.accent {
+  background: rgba(242, 242, 240, 0.06);
+}
+.im-root .pillar span {
+  font-family: var(--mono);
+  font-size: clamp(8px, 0.7vw, 11px);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.im-root .pillar strong {
+  font-family: var(--serif);
+  font-size: clamp(13px, 1.25vw, 20px);
+  font-weight: 500;
+  color: var(--paper);
+  line-height: 1.3;
+  flex: 1;
+}
+.im-root .pillar p {
+  font-family: var(--sans);
+  font-size: clamp(10px, 0.9vw, 14px);
+  font-weight: 300;
+  color: rgba(242, 242, 240, 0.5);
+  line-height: 1.5;
+}
+
+/* ── Close slide (big statement) ── */
+.im-root .close-slide {
+  justify-content: center;
+}
+.im-root .close-slide h2 {
+  max-width: 28ch;
+  font-size: clamp(24px, 3.1vw, 52px);
+}
+.im-root .formula-block {
+  font-family: var(--mono);
+  font-size: clamp(18px, 2.5vw, 42px);
+  color: var(--paper);
+  letter-spacing: 0.04em;
+  margin: 2.5vh 0;
+  padding: 2vh 2.5vw;
+  border: 1px solid var(--line);
+  display: inline-block;
+  background: rgba(242, 242, 240, 0.04);
+}
+
+/* ── Data / chart slide ── */
+.im-root .data-slide {
+  /* slide base */
+}
+.im-root .kpi-row {
+  display: flex;
+  gap: 3vw;
+  margin-top: 2vh;
+  margin-bottom: 3vh;
+}
+.im-root .kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4vh;
+}
+.im-root .kpi .kpi-val {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.8vw, 48px);
+  font-weight: 600;
+  color: var(--paper);
+  line-height: 1;
+}
+.im-root .kpi .kpi-lbl {
+  font-family: var(--mono);
+  font-size: clamp(8px, 0.7vw, 11px);
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── Chart area ── */
+.im-root .chart-area {
+  position: absolute;
+  left: 6vw;
+  right: 6vw;
+  bottom: 6vh;
+  top: 46%;
+}
+
+/* ── Slide aside (SVG infographic panel) ── */
+.im-root .slide-aside {
+  position: absolute;
+  right: 6vw;
+  bottom: 6vh;
+  width: min(380px, 34vw);
+}
+
+/* ── Deck footer ── */
+.im-root .deck-footer {
+  position: absolute;
+  bottom: 2.4vh;
+  left: 6vw;
+  right: 6vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.im-root .slide-dots {
+  display: flex;
+  gap: 6px;
+  pointer-events: all;
+}
+.im-root .slide-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(242, 242, 240, 0.2);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+}
+.im-root .slide-dot.active {
+  background: rgba(242, 242, 240, 0.7);
+}
+.im-root .deck-counter {
+  font-family: var(--mono);
+  font-size: clamp(9px, 0.75vw, 12px);
+  letter-spacing: 0.1em;
+  color: rgba(242, 242, 240, 0.25);
+}
+
+/* ── Code/formula inline ── */
+.im-root code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: rgba(242, 242, 240, 0.75);
+  background: rgba(242, 242, 240, 0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
