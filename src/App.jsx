@@ -352,57 +352,50 @@ function S03({ reveal }) {
 function S04({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
-    <article className="slide" style={{ padding: 0, overflow: 'hidden' }}>
-      {/* Eyebrow floats above circuit */}
-      <p className="eyebrow" style={{ position: 'absolute', top: '4.5vh', left: '6vw', zIndex: 3, marginBottom: 0 }}>
-        04 · QAPINN ARCHITECTURE
-      </p>
-
-      {/* Circuit at top — width-capped so rendered height stays ~32vh */}
-      <div className={ri(3)} style={{
-        position: 'absolute', top: '10vh', left: 0, right: 0,
-        display: 'flex', justifyContent: 'center', zIndex: 1,
-      }}>
-        <div style={{ width: 'min(580px, 78vw)' }}>
-          <CircuitSVG />
+    <article className="slide shift-slide">
+      <p className="eyebrow">04 · QAPINN ARCHITECTURE</p>
+      <h2>The only change: replace the first layer<br />with a <em>Variational Quantum Circuit.</em></h2>
+      <div className="context-layout">
+        <div className={ri(1)}>
+          <p className="ctx-label">Classical PINN</p>
+          <div className="ctx-inputs">
+            <strong>Linear(2 → 64)</strong>
+            <strong>tanh activations</strong>
+            <strong>Hidden blocks × 3</strong>
+            <strong>Linear(64 → 1)</strong>
+          </div>
+        </div>
+        <div className={`ctx-arrow${reveal >= 1 ? '' : ' ri'}`}>→</div>
+        <div className={`ctx-result ${ri(2)}`}>
+          <p className="ctx-label">QAPINN</p>
+          <strong>QuantumLayer(2 → 4)</strong>
+          <strong>⟨Z⟩ expectation values</strong>
+          <strong>Same hidden tail</strong>
+          <strong>985 params total</strong>
         </div>
       </div>
 
-      {/* Glass panel — gradient + blur over circuit bottom, all text here */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '2.5vh 6vw 4vh',
-        background: 'linear-gradient(to top, rgba(5,5,5,0.97) 70%, transparent)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-        zIndex: 2,
-      }}>
-        <h2 style={{ fontSize: 'clamp(18px, 2.4vw, 38px)', marginBottom: '2vh', maxWidth: '40ch' }}>
-          The only change: replace the first layer<br />with a <em>Variational Quantum Circuit.</em>
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 1.2fr', alignItems: 'start' }}>
-          <div className={ri(1)}>
-            <p className="ctx-label">Classical PINN</p>
-            <div className="ctx-inputs">
-              <strong>Linear(2 → 64)</strong>
-              <strong>tanh activations</strong>
-              <strong>Hidden blocks × 3</strong>
-              <strong>Linear(64 → 1)</strong>
-            </div>
+      {/* Reveal 3: circuit overlays as top layer — backdrop-filter blurs everything behind */}
+      {reveal >= 3 && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          background: 'rgba(5,5,5,0.65)',
+          zIndex: 10,
+          padding: '4vh 8vw',
+          animation: 'im-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both',
+        }}>
+          <div style={{ width: 'min(680px, 86vw)' }}>
+            <CircuitSVG />
           </div>
-          <div className={`ctx-arrow${reveal >= 1 ? '' : ' ri'}`}>→</div>
-          <div className={`ctx-result ${ri(2)}`}>
-            <p className="ctx-label">QAPINN</p>
-            <strong>QuantumLayer(2 → 4)</strong>
-            <strong>⟨Z⟩ expectation values</strong>
-            <strong>Same hidden tail</strong>
-            <strong>985 params total</strong>
-          </div>
+          <p className={`caption ${ri(4)}`} style={{ marginTop: '2vh', textAlign: 'center' }}>
+            4 qubits · 2 re-upload layers · ring entanglement → K = 4
+          </p>
         </div>
-        <p className={`caption ${ri(4)}`} style={{ marginTop: '1.6vh' }}>
-          4 qubits · 2 re-upload layers · ring entanglement → K = 4
-        </p>
-      </div>
+      )}
     </article>
   );
 }
