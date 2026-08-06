@@ -109,8 +109,8 @@ const SLIDE_COUNT = REVEAL_COUNTS.length;
 
 const NOTES = [
   /* 00 */ 'Opening. One sentence: does bolting a quantum circuit onto a physics neural network actually help? We ran thirty controlled experiments on two fluid-dynamics equations to find out. The answer is more interesting than yes or no — and I will show you the runs where quantum lost.',
-  /* 01 */ 'Why anyone should care. Simulating fluid flow is the design bottleneck in aircraft, turbines and weather. Every high-fidelity run costs hours on a cluster, and engineers need thousands of them. Neural surrogates promise to replace the mesh. The open question is whether quantum layers make those surrogates better or just slower.',
-  /* 02 */ 'The research question. Not "is quantum faster" — that question is unanswerable on a simulator. The question is: under what conditions does the quantum layer change how the network learns, and can we predict those conditions before spending any compute?',
+  /* 01 */ 'Why anyone should care. Simulating fluid flow is the design bottleneck in aircraft, turbines and weather. Every high-fidelity run costs hours on a cluster, and engineers need thousands of them. Neural surrogates promise to replace the mesh. Be careful with the last pillar: quantum PINNs already exist in the literature. What is missing is a way to know in advance whether one will help you.',
+  /* 02 */ 'The research question, and be precise about credit here. The bandwidth theorem is Schuld et al. 2021 — established theory, not ours. Quantum PINN benchmarks also already exist. The gap we are filling is between them: turning that theorem into a number an engineer computes before training, and testing it as a controlled ablation that includes the runs where quantum loses. If a judge knows this literature, this slide should land as accurate rather than as a novelty claim.',
   /* 03 */ 'This is the only slide aimed at non-experts. A PINN learns a solution by being punished for breaking physics, not by being shown answers. Take about forty-five seconds here. The key idea is: no training data, just the equation itself as the loss.',
   /* 04 */ 'The single architectural change. We replace only the first layer with a variational quantum circuit. Everything downstream is byte-identical — same hidden size, same depth, same optimiser, same seeds. That is what makes this a controlled experiment rather than a benchmark.',
   /* 05 */ 'Answer up front. The bandwidth K predicts how accurate the quantum model can get. Say the second sentence clearly: it does NOT predict that quantum beats classical. We ran four problem setups. The formula ranked the quantum models correctly in all four. Quantum beat the classical network in exactly one. The formula explains the quantum family; it does not crown it.',
@@ -467,7 +467,7 @@ function S01({ reveal }) {
     ['THE PROMISE', 'A neural network can replace the mesh entirely',
      'Train once on the physics itself, then evaluate anywhere, instantly — no grid, no re-meshing.'],
     ['THE OPEN QUESTION', 'Does adding a quantum circuit make that surrogate better?',
-     'Or just slower? Nobody has answered this with a controlled experiment. That is what we did.'],
+     'Or just slower? Quantum PINNs have been built and benchmarked before. What is missing is a rule that tells you which of the two you are going to get — before you train.'],
   ];
   return (
     <article className="slide map-slide">
@@ -494,24 +494,24 @@ function S02({ reveal }) {
       <h2>Not "is quantum faster."<br /><em>When does it change how the network learns — and why?</em></h2>
       <div className="context-layout">
         <div className={ri(1)}>
-          <p className="ctx-label">What most papers ask</p>
+          <p className="ctx-label">What we already have</p>
           <div className="ctx-inputs">
-            <strong>Which model scores better?</strong>
-            <strong>Report one benchmark number</strong>
-            <strong>Declare a winner</strong>
-            <strong>Mechanism left unexplained</strong>
+            <strong>Theory: Schuld et al. 2021 — encoding sets the frequency spectrum</strong>
+            <strong>Practice: quantum PINN benchmarks on individual PDEs</strong>
+            <strong>The gap: no way to connect one to the other in advance</strong>
           </div>
         </div>
         <div className={`ctx-arrow${reveal >= 1 ? '' : ' ri'}`}>→</div>
         <div className={`ctx-result ${ri(2)}`}>
-          <p className="ctx-label">What we ask instead</p>
-          <strong>What property of the circuit controls learning?</strong>
-          <strong>Can we predict it before training?</strong>
-          <strong>Where does it fail, and does the same rule explain that too?</strong>
+          <p className="ctx-label">What we set out to add</p>
+          <strong>Turn the theory into a number you compute before training</strong>
+          <strong>Test it as a controlled ablation, not a benchmark</strong>
+          <strong>Check it against the failures too, not just the wins</strong>
         </div>
       </div>
-      <p className="caption" style={{ position: 'absolute', bottom: '6vh', left: '6vw', maxWidth: '46ch' }}>
-        A prediction that only explains the wins is not a mechanism. We looked for one that explains the losses.
+      <p className="caption" style={{ position: 'absolute', bottom: '6vh', left: '6vw', maxWidth: '52ch' }}>
+        The bandwidth theorem is not ours. What we are testing is whether it works as a
+        practical design rule for PINNs — and whether it survives contact with the cases where quantum loses.
       </p>
     </article>
   );
@@ -641,8 +641,13 @@ function S06({ reveal }) {
   ];
   return (
     <article className="slide map-slide">
-      <p className="eyebrow">06 · WHY — THE MECHANISM</p>
-      <h2>The circuit is a wave generator with a<br />fixed vocabulary. <em>Training can't extend it.</em></h2>
+      <p className="eyebrow">06 · WHY — THE MECHANISM (NOT OURS)</p>
+      <h2 style={{ marginBottom: '1.2vh' }}>The circuit is a wave generator with a<br />fixed vocabulary. <em>Training can't extend it.</em></h2>
+      <p className="caption" style={{ maxWidth: '56ch' }}>
+        This is a theorem from Schuld et al., <em>Phys. Rev. A</em> 103, 032430 (2021) — established quantum-ML
+        theory, not a finding of ours. Our contribution starts on the next slide: turning it into a design rule
+        and testing whether it predicts real PINN behaviour.
+      </p>
       <div className="pillar-grid cols-4">
         {pillars.map(([sp, st, p], i) => (
           <div key={i} className={`pillar ${i === 3 ? 'accent ' : ''}${ri(i + 1)}`}>
