@@ -416,6 +416,53 @@
   color: rgba(242, 242, 240, 0.25);
 }
 
+/* ── Scoreboard table (slide 15) ── */
+.im-root .metrics {
+  border-top: 1px solid var(--line);
+}
+.im-root .metrics-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 2vw;
+  padding: 1.25vh 0;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+.im-root .metrics-row > span {
+  font-family: var(--mono);
+  font-size: clamp(11px, 1vw, 16px);
+  color: rgba(242, 242, 240, 0.5);
+}
+.im-root .metrics-head > span {
+  font-size: clamp(8px, 0.7vw, 11px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.im-root .metrics .m-label {
+  font-family: var(--sans);
+  font-weight: 300;
+  color: rgba(242, 242, 240, 0.75);
+}
+.im-root .metrics .m-label em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+.im-root .metrics .m-win {
+  color: var(--paper);
+  font-weight: 700;
+}
+.im-root .metrics .m-none {
+  color: rgba(242, 242, 240, 0.28);
+  font-style: italic;
+}
+
+/* Title slide runs to three lines — pull the ceiling down so it fits */
+.im-root .title-slide h1 {
+  font-size: clamp(44px, 6.2vw, 104px);
+}
+
 /* ── Code/formula inline ── */
 .im-root code {
   font-family: var(--mono);
