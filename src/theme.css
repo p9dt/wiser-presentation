@@ -87,15 +87,18 @@
   margin-bottom: 3vh;
 }
 
+/* Measure is the lever here, not font-size: these headlines are full sentences,
+   and a 22ch measure wraps them to 4+ lines which then runs into any content
+   pinned at a fixed top %. 44ch keeps a two-clause headline at two lines. */
 .im-root h2 {
   font-family: var(--serif);
-  font-size: clamp(28px, 3.6vw, 60px);
+  font-size: clamp(20px, 2.5vw, 38px);
   font-weight: 500;
-  line-height: 1.08;
+  line-height: 1.12;
   letter-spacing: -0.015em;
   color: var(--paper);
-  max-width: 22ch;
-  margin-bottom: 2.5vh;
+  max-width: 44ch;
+  margin-bottom: 2.2vh;
 }
 
 .im-root h1 em,
@@ -318,8 +321,8 @@
   justify-content: center;
 }
 .im-root .close-slide h2 {
-  max-width: 28ch;
-  font-size: clamp(24px, 3.1vw, 52px);
+  max-width: 36ch;
+  font-size: clamp(22px, 2.9vw, 46px);
 }
 .im-root .formula-block {
   font-family: var(--mono);
@@ -456,6 +459,34 @@
 .im-root .metrics .m-none {
   color: rgba(242, 242, 240, 0.28);
   font-style: italic;
+}
+
+/* Dense slides: long headline + a lot of body below it. The default h2 ceiling
+   (60px at 22ch) wraps these to 4 lines and runs them into content pinned at a
+   fixed top %. Smaller type + a wider measure keeps them to 2 lines. */
+.im-root .slide.dense h2 {
+  font-size: clamp(18px, 2.15vw, 32px);
+  max-width: 50ch;
+  margin-bottom: 1.4vh;
+}
+.im-root .slide.dense .eyebrow {
+  margin-bottom: 1.6vh;
+}
+
+/* Flow slides: content sits in the normal flex column instead of being pinned
+   at a top %, so a headline that wraps pushes content down rather than under. */
+.im-root .slide.flow {
+  overflow: hidden;
+}
+.im-root .slide.flow .flow-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.im-root .slide.flow .flow-foot {
+  margin-top: auto;
+  padding-top: 1.6vh;
 }
 
 /* Title slide runs to three lines — pull the ceiling down so it fits */

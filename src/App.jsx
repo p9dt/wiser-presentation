@@ -554,51 +554,44 @@ function S03({ reveal }) {
 function S04({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
-    <article className="slide shift-slide">
+    <article className="slide dense flow">
       <p className="eyebrow">04 · WHAT A QAPINN CHANGES</p>
       <h2>We change exactly one layer.<br /><em>Everything else stays byte-identical.</em></h2>
-      <div className="context-layout">
-        <div className={ri(1)}>
-          <p className="ctx-label">Classical PINN</p>
-          <div className="ctx-inputs">
-            <strong>Linear(2 → 64)</strong>
-            <strong>tanh activations</strong>
-            <strong>Hidden blocks × 3</strong>
-            <strong>1 341 parameters</strong>
+
+      <div className="flow-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: '4vw', alignItems: 'center' }}>
+        {/* Left: the two architectures, stacked */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh' }}>
+          <div className={ri(1)}>
+            <p className="ctx-label">Classical PINN</p>
+            <div className="ctx-inputs" style={{ gap: '0.7vh' }}>
+              <strong>Linear(2 → 64)</strong>
+              <strong>tanh activations</strong>
+              <strong>Hidden blocks × 3</strong>
+              <strong>1 341 parameters</strong>
+            </div>
+          </div>
+          <div className={ri(2)} style={{ borderTop: '1px solid var(--line)', paddingTop: '2.2vh' }}>
+            <p className="ctx-label">QAPINN — one layer swapped</p>
+            <div className="ctx-inputs" style={{ gap: '0.7vh' }}>
+              <strong style={{ color: 'var(--paper)', fontStyle: 'normal', fontWeight: 600 }}>QuantumLayer(2 → 4)</strong>
+              <strong style={{ color: 'var(--paper)', fontStyle: 'normal', fontWeight: 600 }}>⟨Z⟩ expectation values</strong>
+              <strong>Same hidden tail, optimiser, seeds</strong>
+              <strong>985 parameters</strong>
+            </div>
           </div>
         </div>
-        <div className={`ctx-arrow${reveal >= 1 ? '' : ' ri'}`}>→</div>
-        <div className={`ctx-result ${ri(2)}`}>
-          <p className="ctx-label">QAPINN</p>
-          <strong>QuantumLayer(2 → 4)</strong>
-          <strong>⟨Z⟩ expectation values</strong>
-          <strong>Same hidden tail, same optimiser, same seeds</strong>
-          <strong>985 parameters</strong>
-        </div>
-      </div>
 
-      {/* Reveal 3: circuit overlays as top layer — backdrop-filter blurs everything behind */}
-      {reveal >= 3 && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          background: 'rgba(5,5,5,0.65)',
-          zIndex: 10,
-          padding: '4vh 8vw',
-          animation: 'im-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both',
-        }}>
-          <div style={{ width: 'min(680px, 86vw)' }}>
+        {/* Right: the circuit itself */}
+        <div className={ri(3)} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ width: '100%' }}>
             <CircuitSVG />
           </div>
-          <p className={`caption ${ri(4)}`} style={{ marginTop: '2vh', textAlign: 'center', maxWidth: '54ch' }}>
-            4 qubits · 2 re-upload layers · ring entanglement. One layer swapped means any
+          <p className={`caption ${ri(4)}`} style={{ marginTop: '1.6vh', maxWidth: 'none' }}>
+            4 qubits · 2 re-upload layers · ring entanglement. Swapping one layer means any
             difference we measure is caused by the circuit and nothing else.
           </p>
         </div>
-      )}
+      </div>
     </article>
   );
 }
@@ -608,8 +601,8 @@ function S05({ reveal }) {
   return (
     <article className="slide close-slide">
       <p className="eyebrow">05 · THE ANSWER, UP FRONT</p>
-      <h2>One number — fixed before training starts — decides how accurate the quantum
-        model can possibly get.<br /><em>It does not decide whether it beats classical.</em></h2>
+      <h2>One number, known before training, caps how good the quantum model can get.<br />
+        <em>It still doesn't decide whether it beats classical.</em></h2>
       <div className={`formula-block ${ri(1)}`}>
         K = (n_qubits ÷ in_dim) × n_uploads
       </div>
@@ -927,12 +920,13 @@ function S14({ reveal }) {
 function S15({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
-    <article className="slide">
+    <article className="slide dense flow">
       <p className="eyebrow">15 · THE FULL SCOREBOARD — INCLUDING THE ROWS WE LOSE</p>
-      <h2 style={{ marginBottom: '2vh' }}>
+      <h2>
         Quantum buys a little accuracy on one equation<br />and <em>pays 23× the training time for it.</em>
       </h2>
-      <div className={ri(1)} style={{ position: 'absolute', left: '6vw', right: '6vw', top: '34%' }}>
+      <div className="flow-body">
+      <div className={ri(1)}>
         <MetricTable
           cols={['Classical PINN', 'SIREN', 'QAPINN Q4']}
           rows={[
@@ -948,12 +942,13 @@ function S15({ reveal }) {
           revealFrom={2} reveal={reveal}
         />
       </div>
-      <p className={`caption ${ri(4)}`} style={{ position: 'absolute', bottom: '3.5vh', left: '6vw', maxWidth: '78ch' }}>
+      <p className={`caption flow-foot ${ri(4)}`} style={{ maxWidth: '92ch' }}>
         White = better. Read the two rows nobody quotes: quantum has the <em>worse</em> PDE residual on Burgers yet the
         better solution error, and it costs 23× the wall clock. Memory and out-of-domain generalization were not measured —
         we are not going to guess them. All figures from <code>results/*/summary.json</code>; heat timings are not
         epoch-matched (6 500 vs 3 000) so we base the cost claim on Burgers, where all runs used 8 500.
       </p>
+      </div>
     </article>
   );
 }
@@ -964,9 +959,9 @@ function S16({ reveal }) {
   const nu1  = NU_SWEEP.filter(d => d.nu === 0.1);
   const fmt = list => list.map(d => `${d.model} ${d.rel.toFixed(4)}${d.winner ? '★' : ''}`).join(' · ');
   return (
-    <article className="slide">
+    <article className="slide dense">
       <p className="eyebrow">16 · RESULT 3 — WE RAN THE MISSING BASELINE, AND IT ENDED THE WINNING STREAK</p>
-      <h2 style={{ marginBottom: '1vh', maxWidth: '30ch' }}>
+      <h2>
         Smooth the shock and the classical network takes the lead back.<br />
         <em>Quantum only wins in the sharpest flow we tested.</em>
       </h2>
@@ -1022,12 +1017,13 @@ function S17({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   const ratio = (CAPACITY.pinn.complexity / CAPACITY.qapinn.complexity).toFixed(1);
   return (
-    <article className="slide">
+    <article className="slide dense flow">
       <p className="eyebrow">17 · EXPLAINABILITY — HOW THE TWO MODELS ACTUALLY LEARN</p>
-      <h2 style={{ marginBottom: '1.5vh' }}>
+      <h2>
         The quantum layer isn't a bigger brain.<br /><em>It's a smaller one that can't cheat.</em>
       </h2>
-      <div style={{ position: 'absolute', left: '6vw', right: '6vw', top: '33%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vw' }}>
+      <div className="flow-body">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vw' }}>
         <div className={ri(1)}>
           <p className="ctx-label">Probe 1 — it fits the physics worse, and the answer better</p>
           <p className="caption" style={{ maxWidth: 'none', marginTop: '1vh' }}>
@@ -1055,19 +1051,20 @@ function S17({ reveal }) {
           </div>
         </div>
       </div>
-      <div className={ri(3)} style={{ position: 'absolute', left: '6vw', right: '6vw', bottom: '10vh', borderTop: '1px solid var(--line)', paddingTop: '2vh' }}>
+      <div className={`flow-foot ${ri(3)}`} style={{ borderTop: '1px solid var(--line)' }}>
         <p className="ctx-label">Both probes point the same direction</p>
-        <p className="caption" style={{ maxWidth: '80ch', marginTop: '0.8vh' }}>
+        <p className="caption" style={{ maxWidth: '86ch', marginTop: '0.8vh' }}>
           Two independent measurements — one from training dynamics, one from a capacity bound — agree that the quantum
           layer is <em>constraining</em> the hypothesis space, not enlarging it. The advantage on Burgers is an inductive-bias
           effect, not extra expressive power. That also explains the heat result: on a smooth problem there is nothing to
           regularise, so the constraint is pure cost.
         </p>
+        <p className={`caption ${ri(4)}`} style={{ maxWidth: '86ch', marginTop: '1.2vh', color: 'rgba(242,242,240,0.38)' }}>
+          Honest limit of this analysis: both probes are indirect. We did not run attribution or neuron-level
+          interpretability, and with 32 runs we cannot separate inductive bias from optimisation luck with statistical confidence.
+        </p>
       </div>
-      <p className={`caption ${ri(4)}`} style={{ position: 'absolute', bottom: '3.5vh', left: '6vw', maxWidth: '70ch' }}>
-        Honest limit of this analysis: both probes are indirect. We did not run attribution or neuron-level
-        interpretability, and with 30 runs we cannot separate inductive bias from optimisation luck with statistical confidence.
-      </p>
+      </div>
     </article>
   );
 }
@@ -1106,22 +1103,24 @@ function S18({ reveal }) {
     </div>
   );
   return (
-    <article className="slide">
+    <article className="slide dense flow">
       <p className="eyebrow">18 · THE HONEST ANSWER — WHEN IT HELPS, WHEN IT DOESN'T</p>
-      <h2 style={{ marginBottom: '1vh', maxWidth: '30ch' }}>
+      <h2>
         The quantum layer is a constraint, not an upgrade.<br />
         <em>It pays off only when the constraint is the right one.</em>
       </h2>
-      <div style={{ position: 'absolute', left: '6vw', right: '6vw', top: '30%', bottom: '9vh', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4vw' }}>
+      <div className="flow-body">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4vw' }}>
         <Col title="✓  WHEN IT HELPS" sub="Broadband problems, tight parameter budgets" items={helps} from={1} accent />
         <Col title="✗  WHEN IT DOESN'T" sub="Smooth problems, and any clock you have to watch" items={hurts} from={1} />
       </div>
-      <p className={`caption ${ri(4)}`} style={{ position: 'absolute', bottom: '3.5vh', left: '6vw', maxWidth: '76ch' }}>
+      <p className={`caption flow-foot ${ri(4)}`} style={{ maxWidth: '86ch' }}>
         The one-sentence version: <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>a band-limited layer helps exactly
         when your PDE has structure the classical network overfits, and hurts everywhere else.</strong> We found that window
         once in four setups. Four setups is not enough to call it a law — but the same formula predicted the win, the losses,
         and the point where the advantage disappears, which is more than a benchmark number does.
       </p>
+      </div>
     </article>
   );
 }
@@ -1235,7 +1234,7 @@ function S22({ reveal }) {
   return (
     <article className="slide close-slide">
       <p className="eyebrow">22 · CONCLUSION</p>
-      <h2 style={{ maxWidth: '26ch' }}>
+      <h2>
         A quantum layer isn't better or worse.<br /><em>It's a constraint you have to earn.</em>
       </h2>
       <div style={{ marginTop: '2vh', display: 'flex', flexDirection: 'column', gap: '1.8vh', maxWidth: '62ch' }}>
