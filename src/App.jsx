@@ -87,7 +87,8 @@ const REVEAL_COUNTS = [
   2, // 02 question
   4, // 03 what is a PINN
   4, // 04 what a QAPINN changes
-  4, // 05 the five experiments
+  4, // 05 architecture deep dive
+  4, // 06 the five experiments
   3, // 05 the answer
   4, // 06 mechanism
   3, // 07 formula
@@ -115,7 +116,8 @@ const NOTES = [
   /* 02 */ 'Be precise about credit here. The bandwidth theorem is Schuld et al. 2021 — established theory, not ours. Quantum PINN benchmarks also already exist. The gap we fill is between them: turn the theorem into a number you compute before training, and test it as a controlled ablation that includes the runs where quantum loses.',
   /* 03 */ 'The only slide for non-experts. A PINN learns a solution by being punished for breaking physics, not by being shown answers. Take about forty-five seconds. Key idea: no training data, the equation itself is the loss.',
   /* 04 */ 'The single architectural change. We replace only the first layer with a variational quantum circuit. Everything downstream is identical — same hidden size, depth, optimiser, seeds, training budget. That is what makes this an ablation rather than a benchmark.',
-  /* 05 */ 'The experiment map. Two PDEs chosen to sit at opposite ends of one axis: heat is smooth with exactly two modes, Burgers is a broadband shock. E1 and E2 ask whether the quantum layer helps on each. E3 is the control — is any effect even quantum, or just periodic activations. E4 and E5 ask whether the bandwidth formula predicts behaviour. Every cell is three seeds on one machine. Say plainly that two of these verdicts are revisions: we had a Burgers win and a SIREN conclusion that did not survive a fair training budget.',
+  /* 05 */ 'The architecture in detail. Walk the diagram left to right. Two numbers go in, normalized. The classical model multiplies by a learned 2-by-20 matrix and squashes with tanh — sixty parameters. The quantum model instead rotates four qubits by angles proportional to x and t, applies learned rotations, entangles with a CNOT ring, re-uploads the input and rotates again, then reads one Pauli-Z expectation per qubit. Twenty-four parameters, four numbers out. Everything right of the second dashed line is identical in both. Then the important part: the PDE residual needs a second derivative of the output, so autograd runs back through the circuit twice per step. That dashed return path is where the twenty-times cost comes from — not the circuit size, the differentiation through it.',
+  /* 06 */ 'The experiment map. Two PDEs chosen to sit at opposite ends of one axis: heat is smooth with exactly two modes, Burgers is a broadband shock. E1 and E2 ask whether the quantum layer helps on each. E3 is the control — is any effect even quantum, or just periodic activations. E4 and E5 ask whether the bandwidth formula predicts behaviour. Every cell is three seeds on one machine. Say plainly that two of these verdicts are revisions: we had a Burgers win and a SIREN conclusion that did not survive a fair training budget.',
   /* 06 */ 'Answer up front, and do not soften it. The bandwidth K predicts what the quantum model can represent. It does not predict an advantage, because there was not one: classical won or tied in every setup we tested, at roughly twenty times less compute. The rest of the talk is why, and why that is still a useful result.',
   /* 07 */ 'The mechanism, and say clearly that it is not ours — Schuld et al., Phys Rev A 2021. The circuit output is a Fourier series whose frequency set is fixed when you build the circuit. Training rescales coefficients; it can never invent a frequency. That is a theorem.',
   /* 08 */ 'The formula. K equals qubits over input dimension, times data uploads. Re-uploading is the lever — angle encoding gives one upload no matter how deep, so stacking layers buys parameters, not bandwidth.',
@@ -318,6 +320,78 @@ function ArchFlowSVG({ reveal }) {
         fontSize={7} fontFamily="Space Mono, monospace">
         everything right of here is byte-identical
       </text>
+    </svg>
+  );
+}
+
+// Architecture deep-dive: the full forward path, the swap point, and the loss.
+function ArchDeepSVG({ reveal }) {
+  const on = n => reveal >= n;
+  const mono = 'Space Mono, monospace';
+  const lbl = (x, y, t, o = 0.34, fs = 7) => (
+    <text x={x} y={y} textAnchor="middle" fill={`rgba(242,242,240,${o})`} fontSize={fs} fontFamily={mono}>{t}</text>
+  );
+  return (
+    <svg viewBox="0 0 940 320" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%' }}>
+      {/* stage captions */}
+      <g className={`fl-head${on(1) ? ' in' : ''}`}>
+        {lbl(76, 14, 'INPUT', 0.28)}{lbl(250, 14, 'FIRST LAYER — the only thing we change', 0.28)}
+        {lbl(600, 14, 'SHARED TAIL — identical in both models', 0.28)}{lbl(846, 14, 'OUTPUT', 0.28)}
+      </g>
+      <line x1={160} y1={22} x2={160} y2={300} stroke="rgba(242,242,240,0.10)" strokeDasharray="2 5" />
+      <line x1={456} y1={22} x2={456} y2={300} stroke="rgba(242,242,240,0.10)" strokeDasharray="2 5" />
+
+      {/* input */}
+      <FlNode x={8}  y={116} w={56} h={32} title="(x, t)" on={on(1)} />
+      <FlNode x={80} y={116} w={72} h={32} title="normalize" sub="→ [−1,1]²" on={on(1)} />
+      <FlEdge from={[64, 132]} to={[116, 116]} on={on(1)} len={60} />
+
+      {/* classical branch */}
+      <FlNode x={176} y={44} w={124} h={32} title="Linear(2 → 20)" sub="+ tanh · 60 params" on={on(1)} />
+      <FlEdge from={[152, 132]} to={[238, 44]} on={on(1)} len={180} />
+
+      {/* quantum branch, expanded */}
+      <FlNode x={176} y={196} w={64} h={30} title="encode" sub="Ry(s·x), Ry(s·t)" on={on(2)} accent />
+      <FlNode x={248} y={196} w={64} h={30} title="rotate" sub="Ry(θ) Rz(θ)" on={on(2)} accent />
+      <FlNode x={320} y={196} w={50} h={30} title="CNOT" sub="ring" on={on(2)} accent />
+      <FlNode x={384} y={196} w={60} h={30} title="⟨Z⟩ × 4" sub="measure" on={on(3)} accent pulse />
+      <FlEdge from={[152, 132]} to={[208, 196]} on={on(2)} len={160} />
+      {[[240, 211, 248], [312, 211, 320], [370, 211, 384]].map(([a, y, b], i) => (
+        <g key={i} className={`fl-head${on(i === 2 ? 3 : 2) ? ' in' : ''}`}>
+          <line x1={a} y1={y} x2={b - 5} y2={y} stroke="rgba(242,242,240,0.32)" strokeWidth={0.9} />
+          <path d={`M${b} ${y} l-5 -3.5 v7 z`} fill="rgba(242,242,240,0.45)" />
+        </g>
+      ))}
+      <g className={`fl-head${on(2) ? ' in' : ''}`}>
+        <path d="M180 236 v8 H366 v-8" stroke="rgba(242,242,240,0.25)" strokeWidth={0.8} fill="none" />
+        {lbl(273, 254, '× 2 re-upload  →  K = (4 ÷ 2) × 2 = 4', 0.42)}
+        {lbl(273, 266, '24 trainable params — vs 60 classical', 0.26)}
+      </g>
+
+      {/* merge into the shared tail */}
+      <FlNode x={488} y={116} w={104} h={32} title="Linear(· → 20)" sub="4 or 2 inputs" on={on(1)} />
+      <FlNode x={612} y={116} w={104} h={32} title="hidden × 3" sub="Linear(20→20) tanh" on={on(1)} />
+      <FlNode x={736} y={116} w={96}  h={32} title="Linear(20→1)" on={on(1)} />
+      <FlNode x={852} y={116} w={56}  h={32} title="u(x,t)" on={on(1)} accent />
+      <FlEdge from={[300, 60]}  to={[540, 116]} on={on(1)} len={300} />
+      <FlEdge from={[444, 211]} to={[540, 148]} on={on(3)} len={220} />
+      {[[592, 612], [716, 736], [832, 852]].map(([a, b], i) => (
+        <g key={i} className={`fl-head${on(1) ? ' in' : ''}`}>
+          <line x1={a} y1={132} x2={b - 5} y2={132} stroke="rgba(242,242,240,0.32)" strokeWidth={0.9} />
+          <path d={`M${b} 132 l-5 -3.5 v7 z`} fill="rgba(242,242,240,0.45)" />
+        </g>
+      ))}
+
+      {/* autograd + loss */}
+      <g className={`fl-head${on(4) ? ' in' : ''}`}>
+        <path d="M880 148 V286 H150 V152" stroke="rgba(242,242,240,0.28)" strokeWidth={0.9}
+          strokeDasharray="4 3" fill="none" />
+        <path d="M150 148 l-3.5 6 h7 z" fill="rgba(242,242,240,0.4)" />
+        {lbl(515, 282, 'autograd back through the circuit  →  ∂u/∂t,  ∂u/∂x,  ∂²u/∂x²', 0.44, 7.5)}
+        {lbl(515, 296, 'second derivatives through a state-vector sim — this is the ~20× cost', 0.26)}
+      </g>
+      <FlNode x={700} y={196} w={208} h={44} title="loss = PDE residual + BC/IC" sub="8 000 collocation · 400 supervised" on={on(4)} />
+      <FlEdge from={[880, 148]} to={[804, 196]} on={on(4)} len={120} />
     </svg>
   );
 }
@@ -676,6 +750,42 @@ function S04({ reveal }) {
   );
 }
 
+function SArchDetail({ reveal }) {
+  const ri = n => `ri${reveal >= n ? ' in' : ''}`;
+  const cols = [
+    ['WHAT GOES IN', 'Two numbers: a position and a time',
+     'Every training step feeds 8 000 randomly drawn (x,t) points plus 400 on the boundary and initial line. Both are affinely normalized to [−1,1] first — without that the first layer saturates.'],
+    ['WHAT ACTUALLY CHANGES', 'A 60-parameter matrix becomes a 24-parameter circuit',
+     'Classical: multiply by a learned 2×20 matrix, squash with tanh, done. Quantum: rotate 4 qubits by angles proportional to x and t, apply learned rotations, entangle with a CNOT ring, re-upload the input, rotate again — then read one ⟨Z⟩ per qubit. Four numbers in [−1,1] come out.'],
+    ['WHAT COMES OUT', 'One value of u, and the derivatives of that value',
+     'The tail maps those 4 numbers to a single u(x,t). Then autograd differentiates u back through the whole network — including the circuit — to get ∂u/∂t, ∂u/∂x and ∂²u/∂x², which is what the PDE residual needs.'],
+  ];
+  return (
+    <article className="slide dense flow">
+      <p className="eyebrow">05 · ARCHITECTURE — WHAT THE NETWORK ACTUALLY DOES</p>
+      <h2>Two numbers in, one number out.<br /><em>We replace 60 parameters with 24 and change nothing else.</em></h2>
+      <div className="flow-body">
+        <div className={ri(1)}><ArchDeepSVG reveal={reveal} /></div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2.6vw', marginTop: '1.4vh' }}>
+          {cols.map(([k, t, c], i) => (
+            <div key={k} className={ri(Math.min(i + 2, 4))} style={{ borderTop: '1px solid var(--line)', paddingTop: '1.1vh' }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 'clamp(8px,0.68vw,11px)', letterSpacing: '0.14em', color: 'var(--muted)' }}>{k}</span>
+              <p style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(11px,1vw,16px)', fontWeight: 500, color: 'var(--paper)', margin: '0.3vh 0', lineHeight: 1.25 }}>{t}</p>
+              <p className="caption" style={{ maxWidth: 'none' }}>{c}</p>
+            </div>
+          ))}
+        </div>
+        <p className={`caption flow-foot ${ri(4)}`} style={{ maxWidth: '96ch' }}>
+          <strong style={{ color: 'var(--paper)', fontWeight: 500 }}>Why it costs ~20×:</strong> the PDE residual needs a
+          second derivative of the output with respect to the input, so every training step differentiates twice
+          <em> through the state-vector simulation</em>. That is the dashed return path. The circuit is tiny — 4 qubits,
+          16 amplitudes — but it is evaluated and differentiated 8 400 times per step, in Python, per gate.
+        </p>
+      </div>
+    </article>
+  );
+}
+
 function SExperiments({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   const rows = [
@@ -687,7 +797,7 @@ function SExperiments({ reveal }) {
   ];
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">05 · THE FIVE EXPERIMENTS</p>
+      <p className="eyebrow">06 · THE FIVE EXPERIMENTS</p>
       <h2>Two equations chosen to sit at opposite ends of one axis,<br />
         <em>and five tests built around them.</em></h2>
       <div className="flow-body" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: '3vw', alignItems: 'center' }}>
@@ -721,7 +831,7 @@ function S05({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide close-slide">
-      <p className="eyebrow">06 · THE ANSWER, UP FRONT</p>
+      <p className="eyebrow">07 · THE ANSWER, UP FRONT</p>
       <h2>One number, known before training, tells you what the circuit can represent.<br />
         <em>It never told us the quantum model would win — because it didn't.</em></h2>
       <div className={`formula-block ${ri(1)}`}>K = (n_qubits ÷ in_dim) × n_uploads</div>
@@ -753,7 +863,7 @@ function S06({ reveal }) {
   ];
   return (
     <article className="slide dense map-slide">
-      <p className="eyebrow">07 · WHY — THE MECHANISM (NOT OURS)</p>
+      <p className="eyebrow">08 · WHY — THE MECHANISM (NOT OURS)</p>
       <h2 style={{ marginBottom: '1.2vh' }}>The circuit is a wave generator with a<br />fixed vocabulary. <em>Training can't extend it.</em></h2>
       <p className="caption" style={{ maxWidth: '58ch' }}>
         A theorem from Schuld et al., <em>Phys. Rev. A</em> 103, 032430 (2021) — established quantum-ML
@@ -779,7 +889,7 @@ function S07({ reveal }) {
   ];
   return (
     <article className="slide dense" style={{ justifyContent: 'flex-start' }}>
-      <p className="eyebrow">08 · HOW TO COMPUTE THE CEILING</p>
+      <p className="eyebrow">09 · HOW TO COMPUTE THE CEILING</p>
       <h2>Three numbers you already know give you the ceiling <em>before you spend a GPU-hour.</em></h2>
       <div className="formula-block" style={{ fontSize: 'clamp(16px,2.2vw,34px)', marginBottom: '2vh' }}>
         K = (n_qubits ÷ in_dim) × n_uploads
@@ -808,7 +918,7 @@ function S08({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">09 · WE MEASURED THE CEILING — IT IS REALLY THERE</p>
+      <p className="eyebrow">10 · WE MEASURED THE CEILING — IT IS REALLY THERE</p>
       <h2>Sweep one input, take a Fourier transform:<br />the circuit's output <em>flatlines exactly at K.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.000" lbl="magnitude past K, all 3 configs" />
@@ -839,7 +949,7 @@ function S09({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense shift-slide">
-      <p className="eyebrow">10 · TESTBED 1 — THE HEAT EQUATION</p>
+      <p className="eyebrow">11 · TESTBED 1 — THE HEAT EQUATION</p>
       <h2>We picked a problem where the right answer is known,<br />so a <em>wrong prediction has nowhere to hide.</em></h2>
       <div className="context-layout">
         <div className={ri(1)}>
@@ -881,7 +991,7 @@ function S10({ reveal }) {
   ];
   return (
     <article className="slide dense rules-slide">
-      <p className="eyebrow">11 · METHOD — 18 RUNS, AND A FLAW WE FOUND IN OUR OWN DESIGN</p>
+      <p className="eyebrow">12 · METHOD — 18 RUNS, AND A FLAW WE FOUND IN OUR OWN DESIGN</p>
       <h2>Six bandwidths, three seeds.<br /><em>But the ladder changes qubit count too.</em></h2>
       <div className="rule-list" style={{ top: '33%' }}>
         {rows.map(([k, cfg, bw, is4], i) => (
@@ -912,7 +1022,7 @@ function S11({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">12 · RESULT 1 — SPLIT THE SWEEP AND THE MECHANISM APPEARS</p>
+      <p className="eyebrow">13 · RESULT 1 — SPLIT THE SWEEP AND THE MECHANISM APPEARS</p>
       <h2>Hold the qubit count fixed, and bandwidth behaves<br /><em>exactly as the theory says it should.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.024" lbl="K=2 · 4 qubits · under-covers" />
@@ -947,7 +1057,7 @@ function S12({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense shift-slide">
-      <p className="eyebrow">13 · TESTBED 2 — BURGERS, THE HARD CASE</p>
+      <p className="eyebrow">14 · TESTBED 2 — BURGERS, THE HARD CASE</p>
       <h2>A shock wave has detail at every scale.<br /><em>This is where a bandwidth limit should hurt.</em></h2>
       <div className="context-layout">
         <div className={ri(1)}>
@@ -980,7 +1090,7 @@ function S13({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">14 · RESULT 2 — ON THE HARD PROBLEM, CLASSICAL WINS CLEARLY</p>
+      <p className="eyebrow">15 · RESULT 2 — ON THE HARD PROBLEM, CLASSICAL WINS CLEARLY</p>
       <h2>The classical network is 3.1× more accurate,<br /><em>and this gap survives three seeds.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.0063" lbl="classical PINN" />
@@ -1015,7 +1125,7 @@ function S14({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">15 · THE RESULT WE ALMOST REPORTED</p>
+      <p className="eyebrow">16 · THE RESULT WE ALMOST REPORTED</p>
       <h2>We had a 7.8% quantum win.<br /><em>It was our classical baseline being under-trained.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.0756" lbl="classical @ 500 L-BFGS steps" />
@@ -1049,7 +1159,7 @@ function S15({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">16 · THE FULL SCOREBOARD — INCLUDING THE ROWS WE LOSE</p>
+      <p className="eyebrow">17 · THE FULL SCOREBOARD — INCLUDING THE ROWS WE LOSE</p>
       <h2>Tied on the smooth problem, beaten on the hard one,<br /><em>and ~20× the cost either way.</em></h2>
       <div className="flow-body">
         <div className={ri(1)}>
@@ -1083,7 +1193,7 @@ function S16({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">17 · THE FINDING WE WEREN'T LOOKING FOR</p>
+      <p className="eyebrow">18 · THE FINDING WE WEREN'T LOOKING FOR</p>
       <h2>Run it again with a different seed and the quantum answer moves.<br />
         <em>The classical one barely does.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
@@ -1120,7 +1230,7 @@ function S17({ reveal }) {
   const ratio = (CAPACITY.pinn / CAPACITY.qapinn).toFixed(1);
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">18 · EXPLAINABILITY — HOW THE TWO MODELS DIFFER</p>
+      <p className="eyebrow">19 · EXPLAINABILITY — HOW THE TWO MODELS DIFFER</p>
       <h2>The quantum layer isn't a bigger brain.<br /><em>It's a smaller one — which is the whole problem.</em></h2>
       <div className="flow-body">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vw' }}>
@@ -1193,7 +1303,7 @@ function S18({ reveal }) {
   );
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">19 · THE HONEST ANSWER — WHEN IT HELPS, WHEN IT DOESN'T</p>
+      <p className="eyebrow">20 · THE HONEST ANSWER — WHEN IT HELPS, WHEN IT DOESN'T</p>
       <h2>The quantum layer removes capability in a structured way.<br />
         <em>That only pays if the structure suits the problem. Here it never did.</em></h2>
       <div className="flow-body">
@@ -1226,7 +1336,7 @@ function S19({ reveal }) {
   ];
   return (
     <article className="slide dense rules-slide">
-      <p className="eyebrow">20 · THE RECOMMENDATION — HOW TO BUILD ONE OF THESE</p>
+      <p className="eyebrow">21 · THE RECOMMENDATION — HOW TO BUILD ONE OF THESE</p>
       <h2>Four steps, and the first one<br />is <em>"probably don't."</em></h2>
       <div className="rule-list" style={{ top: '33%', width: 'min(900px, 68vw)' }}>
         {rows.map(([n, t, c], i) => (
@@ -1258,7 +1368,7 @@ function S20({ reveal }) {
   ];
   return (
     <article className="slide dense map-slide">
-      <p className="eyebrow">21 · LIMITATIONS</p>
+      <p className="eyebrow">22 · LIMITATIONS</p>
       <h2>What this result does not cover,<br /><em>said before anyone has to ask.</em></h2>
       <div className="pillar-grid cols-4">
         {pillars.map(([sp, st, p], i) => (
@@ -1285,7 +1395,7 @@ function S21({ reveal }) {
   ];
   return (
     <article className="slide dense rules-slide">
-      <p className="eyebrow">22 · FUTURE WORK</p>
+      <p className="eyebrow">23 · FUTURE WORK</p>
       <h2>Four experiments that would<br />either <em>break this or extend it.</em></h2>
       <div className="rule-list" style={{ top: '33%', width: 'min(900px, 68vw)' }}>
         {rows.map(([n, t, c], i) => (
@@ -1313,7 +1423,7 @@ function S22({ reveal }) {
   ];
   return (
     <article className="slide close-slide">
-      <p className="eyebrow">23 · CONCLUSION</p>
+      <p className="eyebrow">24 · CONCLUSION</p>
       <h2>A quantum layer is a constraint you have to earn.<br /><em>On these problems, it wasn't earned.</em></h2>
       <div style={{ marginTop: '2vh', display: 'flex', flexDirection: 'column', gap: '1.6vh', maxWidth: '66ch' }}>
         {rows.map(([tag, t, c], i) => (
@@ -1337,7 +1447,7 @@ function S22({ reveal }) {
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
-const SLIDES = [S00, S01, S02, S03, S04, SExperiments, S05, S06, S07, S08, S09, S10, S11,
+const SLIDES = [S00, S01, S02, S03, S04, SArchDetail, SExperiments, S05, S06, S07, S08, S09, S10, S11,
                 S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22];
 
 // ─── Chrome ──────────────────────────────────────────────────────────────────
