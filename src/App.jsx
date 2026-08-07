@@ -133,7 +133,7 @@ const NOTES = [
   /* 18 */ 'Explainability. The capacity bound says the quantum model is a structurally simpler function class — 3.2 times lower complexity, 27 percent fewer parameters. It reaches comparable accuracy on heat with that simpler class. So the layer constrains rather than expands, which is exactly what the Fourier theorem says it should do. The honest limit: both probes are indirect.',
   /* 19 */ 'The heart of the talk, and give it the most time. The quantum layer replaces a free learned map with a fixed band-limited basis. That is a restriction. A restriction can only pay off if it matches the problem better than what it replaced. When the target fits inside K we get parity; when it does not we lose; and when a band-limited prior is genuinely what you want, SIREN gives you one for a twentieth of the cost. There is no regime here where band-limiting wins.',
   /* 20 */ 'The deliverable. Step zero is check whether you need this at all. Then Fourier-analyse the target, pick K with margin, and buy K with re-uploads before qubits — but know that qubit count also sets the output width, so it is doing two jobs.',
-  /* 21 */ 'Limitations, stated before anyone asks. Simulator only. Four to six qubits. Two 1D PDEs. One readout — and our single probability-readout run halved the heat error, so that axis mattered and we did not explore it. The K-sweep confounds bandwidth with register width.',
+  /* 21 */ 'Limitations, stated before anyone asks. Simulator only. Two to five qubits. Two 1D PDEs. One readout — and our single probability-readout run halved the heat error, so that axis mattered and we did not explore it. The K-sweep confounds bandwidth with register width.',
   /* 22 */ 'Four things we would do next, ordered by how fast each would change the recommendation.',
   /* 23 */ 'Close. A quantum layer is a constraint you have to earn, and on these problems it was not earned. The formula predicts what the circuit can represent, we verified that directly, and it correctly predicts where quantum comes closest. We found and corrected a confound that would have handed us a false positive. That is the result.',
 ];
@@ -609,14 +609,23 @@ function MetricTable({ cols, rows, revealFrom, reveal }) {
 function S00() {
   return (
     <article className="slide title-slide">
-      <p className="eyebrow">WISER × BQP · GLOBAL QUANTUM+AI 2026</p>
+      <p className="eyebrow">WISER × BQP · GLOBAL QUANTUM+AI 2026&nbsp;&nbsp;·&nbsp;&nbsp;TEAM SPECTRALQ</p>
       <h1>Does a quantum layer<br />actually help a<br /><em>physics AI?</em></h1>
       <p className="subtitle">
         We replaced one layer of a physics-informed neural network with a quantum circuit and
         ran it as a controlled ablation on two fluid equations, three seeds each.
         The answer is no — and the theory told us why, before we ran anything.
       </p>
-      <p className="title-note">Quantum-Assisted PINNs for CFD · PennyLane state-vector simulation</p>
+      <p className="title-formal">
+        Explainability of the Quantum Layer in Physics-Informed Neural Networks:
+        <br />a Fourier-bandwidth analysis of Quantum-Assisted PINNs (QAPINN)
+      </p>
+      <div className="title-byline">
+        <span><b>Shravan Kumar Sharma</b>University of Notre Dame · USA</span>
+        <span><b>Mayank Sharma</b>IIT Dharwad · India</span>
+        <span><b>Satyabrat Sahu</b>GGSIP University, Delhi · India</span>
+      </div>
+      <p className="title-note">PennyLane state-vector simulation · no quantum hardware</p>
       <p className="nav-hint">↓ / Space  to advance&nbsp;&nbsp;·&nbsp;&nbsp;N  for notes&nbsp;&nbsp;·&nbsp;&nbsp;F  fullscreen</p>
     </article>
   );
