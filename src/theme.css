@@ -461,6 +461,48 @@
   font-style: italic;
 }
 
+/* ── Flow diagrams (mermaid-style nodes + edges, animated on reveal) ── */
+
+/* Nodes rise and fade in. transform-box keeps the translate in user units. */
+.im-root .fl-node {
+  opacity: 0;
+  transform: translateY(7px);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.im-root .fl-node.in { opacity: 1; transform: none; }
+
+/* Edges draw themselves. --len is set per-edge to the path length. */
+.im-root .fl-edge {
+  stroke-dasharray: var(--len, 240);
+  stroke-dashoffset: var(--len, 240);
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.im-root .fl-edge.in { stroke-dashoffset: 0; }
+
+/* Arrowheads follow their edge, just later. */
+.im-root .fl-head {
+  opacity: 0;
+  transition: opacity 0.3s ease 0.45s;
+}
+.im-root .fl-head.in { opacity: 1; }
+
+/* The swapped layer keeps a slow pulse so the eye lands on it. */
+@keyframes fl-pulse {
+  0%, 100% { stroke-opacity: 0.75; }
+  50%      { stroke-opacity: 0.25; }
+}
+.im-root .fl-node.pulse.in rect { animation: fl-pulse 2.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .im-root .fl-node { transition: opacity 0.2s; transform: none; }
+  .im-root .fl-edge { transition: none; stroke-dashoffset: 0; }
+  .im-root .fl-head { transition: none; }
+  .im-root .fl-node.pulse.in rect { animation: none; }
+}
+
 /* Dense slides: long headline + a lot of body below it. The default h2 ceiling
    (60px at 22ch) wraps these to 4 lines and runs them into content pinned at a
    fixed top %. Smaller type + a wider measure keeps them to 2 lines. */

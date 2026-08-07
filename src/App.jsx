@@ -87,6 +87,7 @@ const REVEAL_COUNTS = [
   2, // 02 question
   4, // 03 what is a PINN
   4, // 04 what a QAPINN changes
+  4, // 05 the five experiments
   3, // 05 the answer
   4, // 06 mechanism
   3, // 07 formula
@@ -114,24 +115,25 @@ const NOTES = [
   /* 02 */ 'Be precise about credit here. The bandwidth theorem is Schuld et al. 2021 — established theory, not ours. Quantum PINN benchmarks also already exist. The gap we fill is between them: turn the theorem into a number you compute before training, and test it as a controlled ablation that includes the runs where quantum loses.',
   /* 03 */ 'The only slide for non-experts. A PINN learns a solution by being punished for breaking physics, not by being shown answers. Take about forty-five seconds. Key idea: no training data, the equation itself is the loss.',
   /* 04 */ 'The single architectural change. We replace only the first layer with a variational quantum circuit. Everything downstream is identical — same hidden size, depth, optimiser, seeds, training budget. That is what makes this an ablation rather than a benchmark.',
-  /* 05 */ 'Answer up front, and do not soften it. The bandwidth K predicts what the quantum model can represent. It does not predict an advantage, because there was not one: classical won or tied in every setup we tested, at roughly twenty times less compute. The rest of the talk is why, and why that is still a useful result.',
-  /* 06 */ 'The mechanism, and say clearly that it is not ours — Schuld et al., Phys Rev A 2021. The circuit output is a Fourier series whose frequency set is fixed when you build the circuit. Training rescales coefficients; it can never invent a frequency. That is a theorem.',
-  /* 07 */ 'The formula. K equals qubits over input dimension, times data uploads. Re-uploading is the lever — angle encoding gives one upload no matter how deep, so stacking layers buys parameters, not bandwidth.',
-  /* 08 */ 'This is a measurement, not a claim. We swept one input over a full period and took a DFT of the untrained layer. Magnitude is exactly zero past the predicted K in all three configurations. Also note the amplitude decay: the top mode is representable but weak, which is why margin matters.',
-  /* 09 */ 'Heat as the clean testbed. Exact solution known, so the required modes are known: k equals 1 and 4. That gives a falsifiable prediction rather than a benchmark.',
-  /* 10 */ 'The sweep design — and this is where we disclose a flaw we found in our own experiment. Six bandwidths, three seeds. But look at the qubit column: the ladder alternates two and four qubits, so K and register width were varied together. We can still separate them, which the next slide does.',
-  /* 11 */ 'Two things. First, the honest problem: every four-qubit run beats nearly every two-qubit run, so the dramatic K=3 to K=4 step is also a 2-to-4 qubit step. We cannot attribute that to bandwidth. Second, the clean result: hold qubits at four and vary K alone — 0.024, 0.012, 0.016. Minimum exactly at K=4, with the slight rise at K=8 that capacity theory predicts. That is the mechanism, uncontaminated. Say both halves.',
-  /* 12 */ 'Burgers is the hard case. Nonlinear, shock-forming, broadband. No closed form, so no clean frequency prediction — this is where a bandwidth limit should hurt.',
-  /* 13 */ 'Classical wins by 3.1 times, and with three seeds this one is statistically solid — t equals 4.8. Note SIREN: at a fair budget it now matches the quantum models. That reverses our earlier control conclusion and we say so on the next slide but one.',
-  /* 14 */ 'This is the slide I would lead with if asked what we learned. We had a 7.8 percent quantum win. It was an artifact of stopping L-BFGS at 500 steps — training was still descending. Look at the curve: the vertical drop at the end is the L-BFGS phase, and the classical model gains most from it because it had the most headroom left. Our own report flagged this as limitation L1 before we tested it. Most teams would have shipped the win.',
-  /* 15 */ 'The full scoreboard including the rows we lose. Heat is statistically tied — do not claim a win in either direction there. Burgers classical wins clearly. Cost is roughly twenty times on identical hardware. Memory and out-of-domain generalization were not measured and we say so rather than guess.',
-  /* 16 */ 'The finding nobody was looking for. Classical Burgers lands within 0.7 percent across three seeds. The quantum models vary 24 to 82 percent. That multiplies the cost problem: every quantum number needs several seeds before it means anything, on top of already being twenty times slower.',
-  /* 17 */ 'Explainability. The capacity bound says the quantum model is a structurally simpler function class — 3.2 times lower complexity, 27 percent fewer parameters. It reaches comparable accuracy on heat with that simpler class. So the layer constrains rather than expands, which is exactly what the Fourier theorem says it should do. The honest limit: both probes are indirect.',
-  /* 18 */ 'The heart of the talk, and give it the most time. The quantum layer replaces a free learned map with a fixed band-limited basis. That is a restriction. A restriction can only pay off if it matches the problem better than what it replaced. When the target fits inside K we get parity; when it does not we lose; and when a band-limited prior is genuinely what you want, SIREN gives you one for a twentieth of the cost. There is no regime here where band-limiting wins.',
-  /* 19 */ 'The deliverable. Step zero is check whether you need this at all. Then Fourier-analyse the target, pick K with margin, and buy K with re-uploads before qubits — but know that qubit count also sets the output width, so it is doing two jobs.',
-  /* 20 */ 'Limitations, stated before anyone asks. Simulator only. Four to six qubits. Two 1D PDEs. One readout — and our single probability-readout run halved the heat error, so that axis mattered and we did not explore it. The K-sweep confounds bandwidth with register width.',
-  /* 21 */ 'Four things we would do next, ordered by how fast each would change the recommendation.',
-  /* 22 */ 'Close. A quantum layer is a constraint you have to earn, and on these problems it was not earned. The formula predicts what the circuit can represent, we verified that directly, and it correctly predicts where quantum comes closest. We found and corrected a confound that would have handed us a false positive. That is the result.',
+  /* 05 */ 'The experiment map. Two PDEs chosen to sit at opposite ends of one axis: heat is smooth with exactly two modes, Burgers is a broadband shock. E1 and E2 ask whether the quantum layer helps on each. E3 is the control — is any effect even quantum, or just periodic activations. E4 and E5 ask whether the bandwidth formula predicts behaviour. Every cell is three seeds on one machine. Say plainly that two of these verdicts are revisions: we had a Burgers win and a SIREN conclusion that did not survive a fair training budget.',
+  /* 06 */ 'Answer up front, and do not soften it. The bandwidth K predicts what the quantum model can represent. It does not predict an advantage, because there was not one: classical won or tied in every setup we tested, at roughly twenty times less compute. The rest of the talk is why, and why that is still a useful result.',
+  /* 07 */ 'The mechanism, and say clearly that it is not ours — Schuld et al., Phys Rev A 2021. The circuit output is a Fourier series whose frequency set is fixed when you build the circuit. Training rescales coefficients; it can never invent a frequency. That is a theorem.',
+  /* 08 */ 'The formula. K equals qubits over input dimension, times data uploads. Re-uploading is the lever — angle encoding gives one upload no matter how deep, so stacking layers buys parameters, not bandwidth.',
+  /* 09 */ 'This is a measurement, not a claim. We swept one input over a full period and took a DFT of the untrained layer. Magnitude is exactly zero past the predicted K in all three configurations. Also note the amplitude decay: the top mode is representable but weak, which is why margin matters.',
+  /* 10 */ 'Heat as the clean testbed. Exact solution known, so the required modes are known: k equals 1 and 4. That gives a falsifiable prediction rather than a benchmark.',
+  /* 11 */ 'The sweep design — and this is where we disclose a flaw we found in our own experiment. Six bandwidths, three seeds. But look at the qubit column: the ladder alternates two and four qubits, so K and register width were varied together. We can still separate them, which the next slide does.',
+  /* 12 */ 'Two things. First, the honest problem: every four-qubit run beats nearly every two-qubit run, so the dramatic K=3 to K=4 step is also a 2-to-4 qubit step. We cannot attribute that to bandwidth. Second, the clean result: hold qubits at four and vary K alone — 0.024, 0.012, 0.016. Minimum exactly at K=4, with the slight rise at K=8 that capacity theory predicts. That is the mechanism, uncontaminated. Say both halves.',
+  /* 13 */ 'Burgers is the hard case. Nonlinear, shock-forming, broadband. No closed form, so no clean frequency prediction — this is where a bandwidth limit should hurt.',
+  /* 14 */ 'Classical wins by 3.1 times, and with three seeds this one is statistically solid — t equals 4.8. Note SIREN: at a fair budget it now matches the quantum models. That reverses our earlier control conclusion and we say so on the next slide but one.',
+  /* 15 */ 'This is the slide I would lead with if asked what we learned. We had a 7.8 percent quantum win. It was an artifact of stopping L-BFGS at 500 steps — training was still descending. Look at the curve: the vertical drop at the end is the L-BFGS phase, and the classical model gains most from it because it had the most headroom left. Our own report flagged this as limitation L1 before we tested it. Most teams would have shipped the win.',
+  /* 16 */ 'The full scoreboard including the rows we lose. Heat is statistically tied — do not claim a win in either direction there. Burgers classical wins clearly. Cost is roughly twenty times on identical hardware. Memory and out-of-domain generalization were not measured and we say so rather than guess.',
+  /* 17 */ 'The finding nobody was looking for. Classical Burgers lands within 0.7 percent across three seeds. The quantum models vary 24 to 82 percent. That multiplies the cost problem: every quantum number needs several seeds before it means anything, on top of already being twenty times slower.',
+  /* 18 */ 'Explainability. The capacity bound says the quantum model is a structurally simpler function class — 3.2 times lower complexity, 27 percent fewer parameters. It reaches comparable accuracy on heat with that simpler class. So the layer constrains rather than expands, which is exactly what the Fourier theorem says it should do. The honest limit: both probes are indirect.',
+  /* 19 */ 'The heart of the talk, and give it the most time. The quantum layer replaces a free learned map with a fixed band-limited basis. That is a restriction. A restriction can only pay off if it matches the problem better than what it replaced. When the target fits inside K we get parity; when it does not we lose; and when a band-limited prior is genuinely what you want, SIREN gives you one for a twentieth of the cost. There is no regime here where band-limiting wins.',
+  /* 20 */ 'The deliverable. Step zero is check whether you need this at all. Then Fourier-analyse the target, pick K with margin, and buy K with re-uploads before qubits — but know that qubit count also sets the output width, so it is doing two jobs.',
+  /* 21 */ 'Limitations, stated before anyone asks. Simulator only. Four to six qubits. Two 1D PDEs. One readout — and our single probability-readout run halved the heat error, so that axis mattered and we did not explore it. The K-sweep confounds bandwidth with register width.',
+  /* 22 */ 'Four things we would do next, ordered by how fast each would change the recommendation.',
+  /* 23 */ 'Close. A quantum layer is a constraint you have to earn, and on these problems it was not earned. The formula predicts what the circuit can represent, we verified that directly, and it correctly predicts where quantum comes closest. We found and corrected a confound that would have handed us a false positive. That is the result.',
 ];
 
 // ─── SVG: Quantum circuit ────────────────────────────────────────────────────
@@ -239,6 +241,118 @@ function PinnDiagramSVG() {
       <line x1={366} y1={98} x2={400} y2={76} stroke="rgba(242,242,240,0.3)" strokeWidth={0.9} />
       <text x={432} y={61} textAnchor="middle" fill={PAPER} fontSize={9.5} fontFamily="Space Mono, monospace">error</text>
       <text x={432} y={75} textAnchor="middle" fill="rgba(242,242,240,0.4)" fontSize={7.5} fontFamily="Space Mono, monospace">↺ retrain</text>
+    </svg>
+  );
+}
+
+// ─── Mermaid-style flow diagram primitives ──────────────────────────────────
+// Nodes fade+rise, edges draw themselves, both gated on the slide's reveal
+// counter so the diagram assembles as you talk through it.
+
+function FlNode({ x, y, w, h, title, sub, on, accent, pulse, r = 3 }) {
+  return (
+    <g className={`fl-node${on ? ' in' : ''}${pulse ? ' pulse' : ''}`}>
+      <rect x={x} y={y} width={w} height={h} rx={r}
+        fill={accent ? 'rgba(242,242,240,0.10)' : 'rgba(242,242,240,0.03)'}
+        stroke={accent ? 'rgba(242,242,240,0.75)' : 'rgba(242,242,240,0.30)'}
+        strokeWidth={accent ? 1.1 : 0.8} />
+      <text x={x + w / 2} y={y + (sub ? h / 2 - 2 : h / 2 + 3.5)} textAnchor="middle"
+        fill={accent ? PAPER : 'rgba(242,242,240,0.8)'}
+        fontSize={9.5} fontFamily="Space Mono, monospace">{title}</text>
+      {sub && (
+        <text x={x + w / 2} y={y + h / 2 + 11} textAnchor="middle"
+          fill="rgba(242,242,240,0.42)" fontSize={7.5} fontFamily="Space Mono, monospace">{sub}</text>
+      )}
+    </g>
+  );
+}
+
+// Orthogonal connector: down, across, down — the mermaid elbow.
+function FlEdge({ from, to, on, label, len = 260 }) {
+  const [x1, y1] = from, [x2, y2] = to;
+  const my = y1 + (y2 - y1) / 2;
+  const d = x1 === x2
+    ? `M${x1} ${y1} V${y2 - 6}`
+    : `M${x1} ${y1} V${my} H${x2} V${y2 - 6}`;
+  return (
+    <g>
+      <path d={d} className={`fl-edge${on ? ' in' : ''}`} style={{ '--len': len }}
+        fill="none" stroke="rgba(242,242,240,0.32)" strokeWidth={0.9} />
+      <path d={`M${x2} ${y2} l-3.5 -5 h7 z`} className={`fl-head${on ? ' in' : ''}`}
+        fill="rgba(242,242,240,0.45)" />
+      {label && (
+        <text x={(x1 + x2) / 2} y={my - 4} textAnchor="middle"
+          className={`fl-head${on ? ' in' : ''}`}
+          fill="rgba(242,242,240,0.35)" fontSize={7} fontFamily="Space Mono, monospace">{label}</text>
+      )}
+    </g>
+  );
+}
+
+// Slide 04 — the architecture swap, as a flow.
+function ArchFlowSVG({ reveal }) {
+  const on = n => reveal >= n;
+  const yTop = 30, yMid = 92, yBot = 154, h = 30;
+  return (
+    <svg viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%' }}>
+      <FlNode x={8}   y={yMid} w={72} h={h} title="(x, t)" sub="normalized" on={on(1)} />
+      <FlNode x={112} y={yTop} w={116} h={h} title="Linear(2→20)" sub="classical first layer" on={on(1)} />
+      <FlNode x={112} y={yBot} w={116} h={h} title="QuantumLayer(2→4)" sub="⟨Z⟩ · K = 4" on={on(2)} accent pulse />
+      <FlNode x={264} y={yMid} w={116} h={h} title="hidden × 3" sub="Linear(20→20) tanh" on={on(3)} />
+      <FlNode x={412} y={yMid} w={96}  h={h} title="Linear(20→1)" sub="→ u(x,t)" on={on(3)} />
+
+      {/* input fans out to the two interchangeable first layers */}
+      <FlEdge from={[80, yMid + h / 2]} to={[170, yTop + h]} on={on(1)} len={200} />
+      <FlEdge from={[80, yMid + h / 2]} to={[170, yBot]}     on={on(2)} len={200} />
+      {/* both rejoin the identical tail */}
+      <FlEdge from={[228, yTop + h / 2]} to={[322, yMid]}     on={on(3)} len={200} />
+      <FlEdge from={[228, yBot + h / 2]} to={[322, yMid + h]} on={on(3)} len={200} />
+      <FlEdge from={[380, yMid + h / 2]} to={[460, yMid]}     on={on(3)} len={140} />
+
+      <text x={170} y={yMid + h / 2 + 4} textAnchor="middle"
+        className={`fl-head${on(2) ? ' in' : ''}`}
+        fill="rgba(242,242,240,0.55)" fontSize={8} fontFamily="Space Mono, monospace">
+        swap one layer
+      </text>
+      <text x={343} y={196} textAnchor="middle" fill="rgba(242,242,240,0.22)"
+        fontSize={7} fontFamily="Space Mono, monospace">
+        everything right of here is byte-identical
+      </text>
+    </svg>
+  );
+}
+
+// Slide 05 — the experiment map.
+function ExperimentMapSVG({ reveal }) {
+  const on = n => reveal >= n;
+  const box = { w: 150, h: 34 };
+  const yQ = 8, yPde = 74, yExp = 146, yLad = 210;
+  return (
+    <svg viewBox="0 0 700 268" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%' }}>
+      <FlNode x={275} y={yQ} w={150} h={30} title="Does it help?" sub="one layer swapped" on={on(1)} accent />
+
+      <FlNode x={78}  y={yPde} w={box.w} h={box.h} title="HEAT" sub="smooth · modes k = 1, 4" on={on(1)} />
+      <FlNode x={472} y={yPde} w={box.w} h={box.h} title="BURGERS" sub="shock · broadband" on={on(1)} />
+      <FlEdge from={[350, yQ + 30]} to={[153, yPde]} on={on(1)} len={260} />
+      <FlEdge from={[350, yQ + 30]} to={[547, yPde]} on={on(1)} len={260} />
+
+      <FlNode x={8}   y={yExp} w={132} h={box.h} title="E1  head-to-head" sub="classical vs Q4" on={on(2)} />
+      <FlNode x={152} y={yExp} w={132} h={box.h} title="E4  K-sweep" sub="18 runs · 6 bandwidths" on={on(2)} />
+      <FlNode x={412} y={yExp} w={132} h={box.h} title="E2  head-to-head" sub="classical vs Q4" on={on(2)} />
+      <FlNode x={556} y={yExp} w={132} h={box.h} title="E5  K ladder" sub="Q3 · Q4 · Q5" on={on(2)} />
+      <FlEdge from={[153, yPde + box.h]} to={[74,  yExp]} on={on(2)} len={150} />
+      <FlEdge from={[153, yPde + box.h]} to={[218, yExp]} on={on(2)} len={150} />
+      <FlEdge from={[547, yPde + box.h]} to={[478, yExp]} on={on(2)} len={150} />
+      <FlEdge from={[547, yPde + box.h]} to={[622, yExp]} on={on(2)} len={150} />
+
+      <FlNode x={253} y={yLad} w={194} h={box.h} title="E3  SIREN control" sub="both PDEs · is it just periodicity?" on={on(3)} accent />
+      <FlEdge from={[74,  yExp + box.h]} to={[300, yLad]} on={on(3)} len={420} />
+      <FlEdge from={[622, yExp + box.h]} to={[400, yLad]} on={on(3)} len={420} />
+
+      <text x={350} y={262} textAnchor="middle" fill="rgba(242,242,240,0.22)"
+        fontSize={7.5} fontFamily="Space Mono, monospace">
+        3 seeds every cell · one machine · one training recipe per PDE
+      </text>
     </svg>
   );
 }
@@ -551,14 +665,54 @@ function S04({ reveal }) {
             </div>
           </div>
         </div>
-        <div className={ri(3)} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ width: '100%' }}><CircuitSVG /></div>
-          <p className={`caption ${ri(4)}`} style={{ marginTop: '1.6vh', maxWidth: 'none' }}>
-            4 qubits · 2 re-upload layers · ring entanglement. Swapping one layer means any
-            difference we measure is caused by the circuit and nothing else.
-          </p>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1.6vh' }}>
+          <ArchFlowSVG reveal={reveal} />
+          <div className={ri(4)} style={{ width: '100%', borderTop: '1px solid var(--line)', paddingTop: '1.4vh' }}>
+            <CircuitSVG />
+          </div>
         </div>
       </div>
+    </article>
+  );
+}
+
+function SExperiments({ reveal }) {
+  const ri = n => `ri${reveal >= n ? ' in' : ''}`;
+  const rows = [
+    ['E1', 'Heat — head-to-head', 'Does it help when the target fits inside K?', 'Tied  ·  t = 1.05'],
+    ['E2', 'Burgers — head-to-head', 'Does it help when the target is broadband?', 'Classical 3.1×  ·  t = 4.8'],
+    ['E3', 'SIREN control', 'Is any effect just periodic activations?', 'Not ruled out — SIREN ties Q4'],
+    ['E4', 'Heat K-sweep, 18 runs', 'Does bandwidth K predict accuracy?', 'Yes — at fixed register width'],
+    ['E5', 'Burgers K ladder', 'Does the right K matter on a hard target?', 'No signal — every seed differs'],
+  ];
+  return (
+    <article className="slide dense flow">
+      <p className="eyebrow">05 · THE FIVE EXPERIMENTS</p>
+      <h2>Two equations chosen to sit at opposite ends of one axis,<br />
+        <em>and five tests built around them.</em></h2>
+      <div className="flow-body" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: '3vw', alignItems: 'center' }}>
+        <ExperimentMapSVG reveal={reveal} />
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="metrics" style={{ borderTop: 'none' }}>
+            {rows.map(([id, name, asks, verdict], i) => (
+              <div key={id} className={`metrics-row ${ri(Math.min(i + 1, 4))}`}
+                style={{ gridTemplateColumns: '34px 1fr', gap: '1vw', alignItems: 'start', padding: '1.05vh 0' }}>
+                <span className="rule-num" style={{ paddingTop: '0.15em' }}>{id}</span>
+                <span>
+                  <span style={{ display: 'block', fontFamily: 'var(--serif)', fontSize: 'clamp(12px,1.05vw,17px)', fontWeight: 500, color: 'var(--paper)', lineHeight: 1.25 }}>{name}</span>
+                  <span style={{ display: 'block', fontFamily: 'var(--sans)', fontSize: 'clamp(10px,0.85vw,13px)', fontWeight: 300, color: 'rgba(242,242,240,0.5)', marginTop: '0.15em' }}>{asks}</span>
+                  <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 'clamp(9px,0.75vw,12px)', color: 'rgba(242,242,240,0.72)', marginTop: '0.3em' }}>→ {verdict}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <p className="caption" style={{ position: 'absolute', bottom: '3vh', left: '6vw', maxWidth: '86ch' }}>
+        E1 and E2 ask whether it helps. E3 asks whether any effect is even quantum. E4 and E5 ask whether
+        the bandwidth formula predicts behaviour. Verdicts shown are the final three-seed results — the
+        rest of the deck is how we got to each one, including two we had to revise.
+      </p>
     </article>
   );
 }
@@ -567,7 +721,7 @@ function S05({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide close-slide">
-      <p className="eyebrow">05 · THE ANSWER, UP FRONT</p>
+      <p className="eyebrow">06 · THE ANSWER, UP FRONT</p>
       <h2>One number, known before training, tells you what the circuit can represent.<br />
         <em>It never told us the quantum model would win — because it didn't.</em></h2>
       <div className={`formula-block ${ri(1)}`}>K = (n_qubits ÷ in_dim) × n_uploads</div>
@@ -599,7 +753,7 @@ function S06({ reveal }) {
   ];
   return (
     <article className="slide dense map-slide">
-      <p className="eyebrow">06 · WHY — THE MECHANISM (NOT OURS)</p>
+      <p className="eyebrow">07 · WHY — THE MECHANISM (NOT OURS)</p>
       <h2 style={{ marginBottom: '1.2vh' }}>The circuit is a wave generator with a<br />fixed vocabulary. <em>Training can't extend it.</em></h2>
       <p className="caption" style={{ maxWidth: '58ch' }}>
         A theorem from Schuld et al., <em>Phys. Rev. A</em> 103, 032430 (2021) — established quantum-ML
@@ -625,7 +779,7 @@ function S07({ reveal }) {
   ];
   return (
     <article className="slide dense" style={{ justifyContent: 'flex-start' }}>
-      <p className="eyebrow">07 · HOW TO COMPUTE THE CEILING</p>
+      <p className="eyebrow">08 · HOW TO COMPUTE THE CEILING</p>
       <h2>Three numbers you already know give you the ceiling <em>before you spend a GPU-hour.</em></h2>
       <div className="formula-block" style={{ fontSize: 'clamp(16px,2.2vw,34px)', marginBottom: '2vh' }}>
         K = (n_qubits ÷ in_dim) × n_uploads
@@ -654,7 +808,7 @@ function S08({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">08 · WE MEASURED THE CEILING — IT IS REALLY THERE</p>
+      <p className="eyebrow">09 · WE MEASURED THE CEILING — IT IS REALLY THERE</p>
       <h2>Sweep one input, take a Fourier transform:<br />the circuit's output <em>flatlines exactly at K.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.000" lbl="magnitude past K, all 3 configs" />
@@ -685,7 +839,7 @@ function S09({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense shift-slide">
-      <p className="eyebrow">09 · TESTBED 1 — THE HEAT EQUATION</p>
+      <p className="eyebrow">10 · TESTBED 1 — THE HEAT EQUATION</p>
       <h2>We picked a problem where the right answer is known,<br />so a <em>wrong prediction has nowhere to hide.</em></h2>
       <div className="context-layout">
         <div className={ri(1)}>
@@ -727,7 +881,7 @@ function S10({ reveal }) {
   ];
   return (
     <article className="slide dense rules-slide">
-      <p className="eyebrow">10 · METHOD — 18 RUNS, AND A FLAW WE FOUND IN OUR OWN DESIGN</p>
+      <p className="eyebrow">11 · METHOD — 18 RUNS, AND A FLAW WE FOUND IN OUR OWN DESIGN</p>
       <h2>Six bandwidths, three seeds.<br /><em>But the ladder changes qubit count too.</em></h2>
       <div className="rule-list" style={{ top: '33%' }}>
         {rows.map(([k, cfg, bw, is4], i) => (
@@ -758,7 +912,7 @@ function S11({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">11 · RESULT 1 — SPLIT THE SWEEP AND THE MECHANISM APPEARS</p>
+      <p className="eyebrow">12 · RESULT 1 — SPLIT THE SWEEP AND THE MECHANISM APPEARS</p>
       <h2>Hold the qubit count fixed, and bandwidth behaves<br /><em>exactly as the theory says it should.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.024" lbl="K=2 · 4 qubits · under-covers" />
@@ -793,7 +947,7 @@ function S12({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense shift-slide">
-      <p className="eyebrow">12 · TESTBED 2 — BURGERS, THE HARD CASE</p>
+      <p className="eyebrow">13 · TESTBED 2 — BURGERS, THE HARD CASE</p>
       <h2>A shock wave has detail at every scale.<br /><em>This is where a bandwidth limit should hurt.</em></h2>
       <div className="context-layout">
         <div className={ri(1)}>
@@ -826,7 +980,7 @@ function S13({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">13 · RESULT 2 — ON THE HARD PROBLEM, CLASSICAL WINS CLEARLY</p>
+      <p className="eyebrow">14 · RESULT 2 — ON THE HARD PROBLEM, CLASSICAL WINS CLEARLY</p>
       <h2>The classical network is 3.1× more accurate,<br /><em>and this gap survives three seeds.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.0063" lbl="classical PINN" />
@@ -861,7 +1015,7 @@ function S14({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">14 · THE RESULT WE ALMOST REPORTED</p>
+      <p className="eyebrow">15 · THE RESULT WE ALMOST REPORTED</p>
       <h2>We had a 7.8% quantum win.<br /><em>It was our classical baseline being under-trained.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
         <KPI val="0.0756" lbl="classical @ 500 L-BFGS steps" />
@@ -895,7 +1049,7 @@ function S15({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">15 · THE FULL SCOREBOARD — INCLUDING THE ROWS WE LOSE</p>
+      <p className="eyebrow">16 · THE FULL SCOREBOARD — INCLUDING THE ROWS WE LOSE</p>
       <h2>Tied on the smooth problem, beaten on the hard one,<br /><em>and ~20× the cost either way.</em></h2>
       <div className="flow-body">
         <div className={ri(1)}>
@@ -929,7 +1083,7 @@ function S16({ reveal }) {
   const ri = n => `ri${reveal >= n ? ' in' : ''}`;
   return (
     <article className="slide dense data-slide">
-      <p className="eyebrow">16 · THE FINDING WE WEREN'T LOOKING FOR</p>
+      <p className="eyebrow">17 · THE FINDING WE WEREN'T LOOKING FOR</p>
       <h2>Run it again with a different seed and the quantum answer moves.<br />
         <em>The classical one barely does.</em></h2>
       <div className={`kpi-row ${ri(1)}`}>
@@ -966,7 +1120,7 @@ function S17({ reveal }) {
   const ratio = (CAPACITY.pinn / CAPACITY.qapinn).toFixed(1);
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">17 · EXPLAINABILITY — HOW THE TWO MODELS DIFFER</p>
+      <p className="eyebrow">18 · EXPLAINABILITY — HOW THE TWO MODELS DIFFER</p>
       <h2>The quantum layer isn't a bigger brain.<br /><em>It's a smaller one — which is the whole problem.</em></h2>
       <div className="flow-body">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3vw' }}>
@@ -1039,7 +1193,7 @@ function S18({ reveal }) {
   );
   return (
     <article className="slide dense flow">
-      <p className="eyebrow">18 · THE HONEST ANSWER — WHEN IT HELPS, WHEN IT DOESN'T</p>
+      <p className="eyebrow">19 · THE HONEST ANSWER — WHEN IT HELPS, WHEN IT DOESN'T</p>
       <h2>The quantum layer removes capability in a structured way.<br />
         <em>That only pays if the structure suits the problem. Here it never did.</em></h2>
       <div className="flow-body">
@@ -1072,7 +1226,7 @@ function S19({ reveal }) {
   ];
   return (
     <article className="slide dense rules-slide">
-      <p className="eyebrow">19 · THE RECOMMENDATION — HOW TO BUILD ONE OF THESE</p>
+      <p className="eyebrow">20 · THE RECOMMENDATION — HOW TO BUILD ONE OF THESE</p>
       <h2>Four steps, and the first one<br />is <em>"probably don't."</em></h2>
       <div className="rule-list" style={{ top: '33%', width: 'min(900px, 68vw)' }}>
         {rows.map(([n, t, c], i) => (
@@ -1104,7 +1258,7 @@ function S20({ reveal }) {
   ];
   return (
     <article className="slide dense map-slide">
-      <p className="eyebrow">20 · LIMITATIONS</p>
+      <p className="eyebrow">21 · LIMITATIONS</p>
       <h2>What this result does not cover,<br /><em>said before anyone has to ask.</em></h2>
       <div className="pillar-grid cols-4">
         {pillars.map(([sp, st, p], i) => (
@@ -1131,7 +1285,7 @@ function S21({ reveal }) {
   ];
   return (
     <article className="slide dense rules-slide">
-      <p className="eyebrow">21 · FUTURE WORK</p>
+      <p className="eyebrow">22 · FUTURE WORK</p>
       <h2>Four experiments that would<br />either <em>break this or extend it.</em></h2>
       <div className="rule-list" style={{ top: '33%', width: 'min(900px, 68vw)' }}>
         {rows.map(([n, t, c], i) => (
@@ -1159,7 +1313,7 @@ function S22({ reveal }) {
   ];
   return (
     <article className="slide close-slide">
-      <p className="eyebrow">22 · CONCLUSION</p>
+      <p className="eyebrow">23 · CONCLUSION</p>
       <h2>A quantum layer is a constraint you have to earn.<br /><em>On these problems, it wasn't earned.</em></h2>
       <div style={{ marginTop: '2vh', display: 'flex', flexDirection: 'column', gap: '1.6vh', maxWidth: '66ch' }}>
         {rows.map(([tag, t, c], i) => (
@@ -1183,7 +1337,7 @@ function S22({ reveal }) {
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
-const SLIDES = [S00, S01, S02, S03, S04, S05, S06, S07, S08, S09, S10, S11,
+const SLIDES = [S00, S01, S02, S03, S04, SExperiments, S05, S06, S07, S08, S09, S10, S11,
                 S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22];
 
 // ─── Chrome ──────────────────────────────────────────────────────────────────
