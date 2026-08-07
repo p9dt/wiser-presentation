@@ -626,7 +626,7 @@ function S00() {
         <span><b>Satyabrat Sahu</b>GGSIP University, Delhi · India</span>
       </div>
       <p className="title-note">PennyLane state-vector simulation · no quantum hardware</p>
-      <p className="nav-hint">↓ / Space  to advance&nbsp;&nbsp;·&nbsp;&nbsp;N  for notes&nbsp;&nbsp;·&nbsp;&nbsp;F  fullscreen</p>
+      <p className="nav-hint">↓ / Space  to advance&nbsp;&nbsp;·&nbsp;&nbsp;Shift + →  skips a slide&nbsp;&nbsp;·&nbsp;&nbsp;N  for notes&nbsp;&nbsp;·&nbsp;&nbsp;F  fullscreen</p>
     </article>
   );
 }
@@ -1565,13 +1565,20 @@ export default function App() {
       if (e.key === 'r' || e.key === 'R' || e.key === 'Home') { setActive(0); setReveal(0); return; }
       if (e.key === 'End') { setActive(SLIDE_COUNT - 1); setReveal(0); return; }
 
+      // Shift jumps whole slides, ignoring remaining reveals. Without it, skipping a
+      // slide costs one press per reveal on the slide being skipped, which makes a
+      // shortened run of the deck (see PRESENTER-NOTES-5MIN.md) unpresentable.
       if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) {
         e.preventDefault();
-        if (reveal < REVEAL_COUNTS[active]) setReveal(r => r + 1);
+        if (e.shiftKey) {
+          if (active < SLIDE_COUNT - 1) { setActive(a => a + 1); setReveal(0); }
+        } else if (reveal < REVEAL_COUNTS[active]) setReveal(r => r + 1);
         else if (active < SLIDE_COUNT - 1) { setActive(a => a + 1); setReveal(0); }
       } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) {
         e.preventDefault();
-        if (reveal > 0) setReveal(r => r - 1);
+        if (e.shiftKey) {
+          if (active > 0) { setActive(a => a - 1); setReveal(0); }
+        } else if (reveal > 0) setReveal(r => r - 1);
         else if (active > 0) { const p = active - 1; setActive(p); setReveal(REVEAL_COUNTS[p]); }
       }
     }
