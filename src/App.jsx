@@ -351,21 +351,21 @@ function ArchDeepSVG({ reveal }) {
       <FlEdge from={[152, 132]} to={[238, 44]} on={on(1)} len={180} />
 
       {/* quantum branch, expanded */}
-      <FlNode x={176} y={196} w={64} h={30} title="encode" sub="Ry(s·x), Ry(s·t)" on={on(2)} accent />
-      <FlNode x={248} y={196} w={64} h={30} title="rotate" sub="Ry(θ) Rz(θ)" on={on(2)} accent />
-      <FlNode x={320} y={196} w={50} h={30} title="CNOT" sub="ring" on={on(2)} accent />
-      <FlNode x={384} y={196} w={60} h={30} title="⟨Z⟩ × 4" sub="measure" on={on(3)} accent pulse />
+      <FlNode x={176} y={196} w={72} h={30} title="encode" sub="Ry(x), Ry(t)" on={on(2)} accent />
+      <FlNode x={256} y={196} w={64} h={30} title="rotate" sub="Ry(θ) Rz(θ)" on={on(2)} accent />
+      <FlNode x={328} y={196} w={48} h={30} title="CNOT" sub="ring" on={on(2)} accent />
+      <FlNode x={392} y={196} w={60} h={30} title="⟨Z⟩ × 4" sub="measure" on={on(3)} accent pulse />
       <FlEdge from={[152, 132]} to={[208, 196]} on={on(2)} len={160} />
-      {[[240, 211, 248], [312, 211, 320], [370, 211, 384]].map(([a, y, b], i) => (
+      {[[248, 211, 256], [320, 211, 328], [376, 211, 392]].map(([a, y, b], i) => (
         <g key={i} className={`fl-head${on(i === 2 ? 3 : 2) ? ' in' : ''}`}>
           <line x1={a} y1={y} x2={b - 5} y2={y} stroke="rgba(242,242,240,0.32)" strokeWidth={0.9} />
           <path d={`M${b} ${y} l-5 -3.5 v7 z`} fill="rgba(242,242,240,0.45)" />
         </g>
       ))}
       <g className={`fl-head${on(2) ? ' in' : ''}`}>
-        <path d="M180 236 v8 H366 v-8" stroke="rgba(242,242,240,0.25)" strokeWidth={0.8} fill="none" />
-        {lbl(273, 254, '× 2 re-upload  →  K = (4 ÷ 2) × 2 = 4', 0.42)}
-        {lbl(273, 266, '24 trainable params — vs 60 classical', 0.26)}
+        <path d="M180 236 v8 H374 v-8" stroke="rgba(242,242,240,0.25)" strokeWidth={0.8} fill="none" />
+        {lbl(277, 254, '× 2 re-upload  →  K = (4 ÷ 2) × 2 = 4', 0.42)}
+        {lbl(277, 266, '24 trainable params — vs 60 classical', 0.26)}
       </g>
 
       {/* merge into the shared tail */}
@@ -374,7 +374,7 @@ function ArchDeepSVG({ reveal }) {
       <FlNode x={736} y={116} w={96}  h={32} title="Linear(20→1)" on={on(1)} />
       <FlNode x={852} y={116} w={56}  h={32} title="u(x,t)" on={on(1)} accent />
       <FlEdge from={[300, 60]}  to={[540, 116]} on={on(1)} len={300} />
-      <FlEdge from={[444, 211]} to={[540, 148]} on={on(3)} len={220} />
+      <FlEdge from={[452, 211]} to={[540, 148]} on={on(3)} len={220} />
       {[[592, 612], [716, 736], [832, 852]].map(([a, b], i) => (
         <g key={i} className={`fl-head${on(1) ? ' in' : ''}`}>
           <line x1={a} y1={132} x2={b - 5} y2={132} stroke="rgba(242,242,240,0.32)" strokeWidth={0.9} />
@@ -800,9 +800,9 @@ function SExperiments({ reveal }) {
       <p className="eyebrow">06 · THE FIVE EXPERIMENTS</p>
       <h2>Two equations chosen to sit at opposite ends of one axis,<br />
         <em>and five tests built around them.</em></h2>
-      <div className="flow-body" style={{ display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: '3vw', alignItems: 'center' }}>
-        <ExperimentMapSVG reveal={reveal} />
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="flow-body">
+        <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '1.05fr 1fr', gap: '3vw', alignItems: 'center' }}>
+          <ExperimentMapSVG reveal={reveal} />
           <div className="metrics" style={{ borderTop: 'none' }}>
             {rows.map(([id, name, asks, verdict], i) => (
               <div key={id} className={`metrics-row ${ri(Math.min(i + 1, 4))}`}
@@ -817,12 +817,12 @@ function SExperiments({ reveal }) {
             ))}
           </div>
         </div>
+        <p className="caption flow-foot" style={{ maxWidth: '96ch' }}>
+          E1 and E2 ask whether it helps. E3 asks whether any effect is even quantum. E4 and E5 ask
+          whether the bandwidth formula predicts behaviour. Verdicts are the final three-seed results —
+          two of them are revisions of what we first reported.
+        </p>
       </div>
-      <p className="caption" style={{ position: 'absolute', bottom: '3vh', left: '6vw', maxWidth: '86ch' }}>
-        E1 and E2 ask whether it helps. E3 asks whether any effect is even quantum. E4 and E5 ask whether
-        the bandwidth formula predicts behaviour. Verdicts shown are the final three-seed results — the
-        rest of the deck is how we got to each one, including two we had to revise.
-      </p>
     </article>
   );
 }
@@ -925,7 +925,7 @@ function S08({ reveal }) {
         <KPI val="256" lbl="point DFT over one period" />
         <KPI val="untrained" lbl="bandwidth is structural, not learned" />
       </div>
-      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '34vw', top: '40%', bottom: '9vh' }}>
+      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '34vw', top: '40%', bottom: '14vh' }}>
         <SpectrumChart />
       </div>
       <div className={ri(3)} style={{ position: 'absolute', right: '6vw', top: '42%', width: 'min(300px, 25vw)' }}>
@@ -1029,7 +1029,7 @@ function S11({ reveal }) {
         <KPI val="0.012" lbl="K=4 · 4 qubits · covers k=4" />
         <KPI val="0.016" lbl="K=8 · 4 qubits · excess capacity" />
       </div>
-      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '36vw', top: '42%', bottom: '9vh' }}>
+      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '36vw', top: '42%', bottom: '14vh' }}>
         <KSweepChart />
       </div>
       <div className={ri(3)} style={{ position: 'absolute', right: '6vw', top: '43%', width: 'min(330px, 27vw)' }}>
@@ -1098,7 +1098,7 @@ function S13({ reveal }) {
         <KPI val="t = 4.8" lbl="statistically distinguishable" />
         <KPI val="19×" lbl="quantum training cost" />
       </div>
-      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '37vw', top: '42%', bottom: '9vh' }}>
+      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '37vw', top: '42%', bottom: '14vh' }}>
         <SeedScatter data={BURGERS} domain={[0.004, 0.12]} />
       </div>
       <div className={ri(3)} style={{ position: 'absolute', right: '6vw', top: '43%', width: 'min(340px, 28vw)' }}>
@@ -1132,7 +1132,7 @@ function S14({ reveal }) {
         <KPI val="0.0063" lbl="classical @ 5 000 steps" />
         <KPI val="12×" lbl="improvement from budget alone" />
       </div>
-      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '37vw', top: '42%', bottom: '9vh' }}>
+      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '37vw', top: '42%', bottom: '14vh' }}>
         <LossCurveChart />
       </div>
       <div className={ri(3)} style={{ position: 'absolute', right: '6vw', top: '43%', width: 'min(340px, 28vw)' }}>
@@ -1201,7 +1201,7 @@ function S16({ reveal }) {
         <KPI val="82%" lbl="QAPINN spread, heat" />
         <KPI val="×3" lbl="seeds — the minimum to see this at all" />
       </div>
-      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '38vw', top: '40%', bottom: '9vh' }}>
+      <div className={ri(2)} style={{ position: 'absolute', left: '6vw', right: '38vw', top: '40%', bottom: '14vh' }}>
         <ReproChart />
       </div>
       <div className={ri(3)} style={{ position: 'absolute', right: '6vw', top: '42%', width: 'min(350px, 29vw)' }}>
