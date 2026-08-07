@@ -610,15 +610,15 @@ function S00() {
   return (
     <article className="slide title-slide">
       <p className="eyebrow">WISER × BQP · GLOBAL QUANTUM+AI 2026&nbsp;&nbsp;·&nbsp;&nbsp;TEAM SPECTRALQ</p>
-      <h1>Does a quantum layer<br />actually help a<br /><em>physics AI?</em></h1>
-      <p className="subtitle">
-        We replaced one layer of a physics-informed neural network with a quantum circuit and
-        ran it as a controlled ablation on two fluid equations, three seeds each.
-        The answer is no — and the theory told us why, before we ran anything.
-      </p>
-      <p className="title-formal">
+      <h1>
         Explainability of the Quantum Layer in Physics-Informed Neural Networks:
-        <br />a Fourier-bandwidth analysis of Quantum-Assisted PINNs (QAPINN)
+        <br /><em>a Fourier-bandwidth analysis of Quantum-Assisted PINNs (QAPINN)</em>
+      </h1>
+      <p className="subtitle">
+        Does a quantum layer actually help a physics AI? We replaced one layer of a
+        physics-informed neural network with a quantum circuit and ran it as a controlled
+        ablation on two fluid equations, three seeds each. The answer is no — and the theory
+        told us why, before we ran anything.
       </p>
       <div className="title-byline">
         <span><b>Shravan Kumar Sharma</b>University of Notre Dame · USA</span>

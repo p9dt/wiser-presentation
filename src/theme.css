@@ -137,21 +137,10 @@
   letter-spacing: 0.04em;
 }
 
-/* Formal project title + author byline on the title slide. */
-.im-root .title-formal {
-  font-family: var(--serif);
-  font-size: clamp(12px, 1.15vw, 17px);
-  font-weight: 400;
-  font-style: italic;
-  color: rgba(242, 242, 240, 0.72);
-  line-height: 1.5;
-  margin-top: 2.6vh;
+/* Author byline on the title slide. */
+.im-root .title-byline {
   padding-top: 2.2vh;
   border-top: 1px solid rgba(242, 242, 240, 0.14);
-  max-width: 66ch;
-}
-
-.im-root .title-byline {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6vh 2.6vw;
@@ -570,9 +559,17 @@
   padding-top: 1.6vh;
 }
 
-/* Title slide runs to three lines — pull the ceiling down so it fits */
+/* The title slide headline is the full paper title, not a short phrase: it needs a
+   wide measure and a readable multi-line leading, so the 16ch/0.9 display setting
+   the other h1 rules assume does not apply here. */
 .im-root .title-slide h1 {
-  font-size: clamp(44px, 6.2vw, 104px);
+  font-size: clamp(26px, 3.5vw, 58px);
+  line-height: 1.08;
+  max-width: 38ch;
+  letter-spacing: -0.015em;
+}
+.im-root .title-slide h1 em {
+  text-decoration: none;
 }
 
 /* ── Code/formula inline ── */
